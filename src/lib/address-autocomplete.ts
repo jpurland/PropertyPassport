@@ -89,7 +89,9 @@ export async function suggestAddresses(query: string, signal: AbortSignal): Prom
       const city = /^(?:UNINCORPORATED|UNINCORPORATED PALM BEACH COUNTY)$/i.test(municipality.trim())
         ? "Palm Beach County" : municipality.trim();
       const address = `${street.trim().replace(/\s+/g, " ")}, ${city}, FL`;
-      if (!unique.has(address)) unique.set(address, { id: String(id), address, ...(typeof attributes.PARCEL_NUMBER === "string" && /^\d{17}$/.test(attributes.PARCEL_NUMBER) ? { parcelNumber: attributes.PARCEL_NUMBER } : {}) });
+      const parcelNumber = typeof attributes.PARCEL_NUMBER === "string" && /^\d{17}$/.test(attributes.PARCEL_NUMBER) ? attributes.PARCEL_NUMBER : undefined;
+      const identity = `${address}|${parcelNumber ?? id}`;
+      if (!unique.has(identity)) unique.set(identity, { id: String(id), address, ...(parcelNumber ? { parcelNumber } : {}) });
       if (unique.size === 5) break;
     }
     const suggestions = [...unique.values()];

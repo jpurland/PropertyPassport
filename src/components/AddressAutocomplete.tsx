@@ -211,6 +211,7 @@ export function AddressAutocomplete({ value, onChange, error, onSelect }: Addres
                 onClick={() => selectSuggestion(suggestion)}
               >
                 {suggestion.address}
+                {currentSuggestions.some((other) => other.id !== suggestion.id && other.address === suggestion.address) && suggestion.parcelNumber ? <span className="mt-1 block text-sm text-muted">Parcel {suggestion.parcelNumber}</span> : null}
               </li>
             ))}
           </ul>

@@ -103,3 +103,14 @@ test("bounds a stalled county request with a timeout", async (t) => {
   t.mock.timers.tick(12_000);
   await assert.rejects(lookup, { name: "AbortError" });
 });
+
+
+test("keeps different parcels sharing one street address as separate choices", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => response([
+    { attributes: { OBJECTID: 901, PARCEL_NUMBER: "00424636010050081", SITE_ADDR_STR: "901 MAIN ST", MUNICIPALITY: "BOCA RATON" } },
+    { attributes: { OBJECTID: 902, PARCEL_NUMBER: "00424636010050082", SITE_ADDR_STR: "901 MAIN ST", MUNICIPALITY: "BOCA RATON" } },
+  ]));
+  const matches = await suggestAddresses("901 main", signal());
+  assert.equal(matches.length, 2);
+  assert.notEqual(matches[0].parcelNumber, matches[1].parcelNumber);
+});
