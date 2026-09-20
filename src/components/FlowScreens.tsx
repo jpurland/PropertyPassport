@@ -38,8 +38,7 @@ export function SearchLanding({
       </p>
 
       <p className="mt-4 rounded border border-champagne/40 bg-paper p-3 text-base text-navy">
-        Find your property’s county record, recorded ownership, values, and latest available sale.
-        Other research areas are clearly marked when they are not connected.
+        Find county ownership, values, and sale records, then check flood and evacuation maps, county zoning, and the right permit portal. Explore the selected address on Zillow.
       </p>
 
       <form

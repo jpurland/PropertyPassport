@@ -1,6 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { PermitResearch, PropertyMaps, ZillowCard, AdditionalSources } from "@/components/PropertyResearch";
+import { permitSource } from "@/lib/property-research";
 import type { CountyPropertyRecord } from "@/lib/property-record";
 import type { UserIntent } from "@/lib/types";
 
@@ -24,11 +26,11 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
   return <>
     <header className="bg-navy text-cream"><div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4"><div><p className="text-xs font-semibold uppercase tracking-widest text-champagne">County records · {intentNames[intent]}</p><p className="font-serif text-2xl">Property Passport</p></div><button type="button" onClick={onStartOver} className="shrink-0 py-2 font-semibold text-champagne">New search</button></div></header>
     <main className="mx-auto max-w-6xl space-y-4 px-4 py-5 sm:px-6">
-      <nav aria-label="Report sections" className="flex flex-wrap gap-x-5 gap-y-2 border-b border-champagne/30 pb-3 text-base font-semibold text-navy">{[["overview", "Overview"], ["value", "County values"], ["sale", "Recorded sale"], ["research", "Still to research"], ["next", "Next steps"]].map(([id, title]) => <a key={id} href={`#${id}`} className="py-1 underline-offset-4 hover:underline">{title}</a>)}</nav>
+      <nav aria-label="Report sections" className="flex flex-wrap gap-x-5 gap-y-2 border-b border-champagne/30 pb-3 text-base font-semibold text-navy">{[["overview", "Overview"], ["permits", "Permits"], ["maps", "Flood & zoning"], ["value", "Values"], ["sale", "Sale"], ["zillow", "Zillow"], ["sources", "More sources"], ["next", "Next steps"]].map(([id, title]) => <a key={id} href={`#${id}`} className="py-1 underline-offset-4 hover:underline">{title}</a>)}</nav>
       <div>
         <h1 className="font-serif text-3xl leading-tight text-navy sm:text-4xl">{r.address}</h1>
         <p className="mt-2 text-sm text-muted">Matched by parcel number · Retrieved {new Date(r.retrievedAt).toLocaleString("en-US")}</p>
-        <p className="mt-2 text-base text-muted">A partial property report from county public data. Source update date and valuation year are not supplied; records may lag recent changes.</p>
+        <p className="mt-2 text-base text-muted">County property records, official map checks, and links for deeper research. Each section identifies its source and coverage; records may lag recent changes.</p>
         <a className="mt-2 inline-block font-semibold text-navy underline" href={r.sourceUrl} target="_blank" rel="noopener noreferrer">View the county source record ↗</a>
       </div>
       <Section id="overview" title="Property overview">
@@ -40,10 +42,12 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
           <Field label="Address locality in county data">{r.locality}</Field>
           <Field label="Parcel area reported by county">{r.acres === null ? missing : `${r.acres.toLocaleString("en-US", { maximumFractionDigits: 4 })} acres`}</Field>
           <Field label="Year built / living area / beds / baths">{missing}</Field>
-          <Field label="Permitting jurisdiction">{r.parcelNumber.startsWith("00") ? "Unincorporated Palm Beach County (PCN prefix 00)" : "Confirm with the county or municipality"}</Field>
+          <Field label="Permitting jurisdiction">{permitSource(r.parcelNumber).jurisdiction}</Field>
         </dl>
         <p className="mt-3 text-sm text-muted">Recorded names are county entries, not a title determination. The address locality may differ from the permitting jurisdiction. Parcel area may include shared land for condominiums.</p>
       </Section>
+      <PermitResearch key={`permits-${r.parcelNumber}`} record={r} />
+      <PropertyMaps key={`maps-${r.parcelNumber}`} parcel={r.parcelNumber} />
       <Section id="value" title="County values">
         <dl className="grid gap-x-8 sm:grid-cols-3"><Field label="County market value">{money(r.countyMarketValue)}</Field><Field label="Assessed value">{money(r.assessedValue)}</Field><Field label="Taxable value">{money(r.taxableValue)}</Field></dl>
         <p className="mt-3 text-base text-muted">These are county assessment figures, not a current sale-price estimate or appraisal. Taxable value is not the tax bill. The source does not identify the valuation year.</p>
@@ -52,13 +56,10 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
         <dl className="grid gap-x-8 sm:grid-cols-2"><Field label="Recorded sale date">{r.saleDate ?? missing}</Field><Field label="Recorded sale price">{money(r.salePrice)}</Field><Field label="Recording book / page">{r.book && r.page ? `${r.book} / ${r.page}` : missing}</Field><Field label="Instrument code (as supplied)">{r.instrument ?? missing}</Field></dl>
         <p className="mt-3 text-sm text-muted">This is one county sale entry, not a complete ownership history. A transfer amount does not establish current market value.</p>
       </Section>
-      <Section id="research" title="Still to research">
-        <div className="grid gap-3 sm:grid-cols-2">{[
-          ["Permits, violations, and liens", "Not connected. No conclusion can be drawn about open permits, violations, or clear title."],
-          ["Flood, evacuation, and insurance", "Not connected. Flood zones, roof condition, and insurance costs have not been checked."],
-          ["Tax bills and association costs", "Not connected. Tax payments, exemptions, HOA dues, and assessments have not been verified."],
-          ["Building details and renovation potential", "Not connected. Living area, age, zoning, setbacks, and renovation feasibility require additional records."],
-        ].map(([title, detail]) => <div key={title} className="rounded border border-navy/10 bg-cream/50 p-3"><h3 className="font-semibold text-navy">{title}</h3><p className="mt-1 text-base text-muted">{detail}</p></div>)}</div>
+      <ZillowCard address={r.address} />
+      <AdditionalSources record={r} />
+      <Section id="research" title="Coverage still to complete">
+        <p className="text-base text-muted">Permit and inspection records must be reviewed on the official portal. Code violations, financial liens, full title history, association dues, insurance quotes, and building condition have not been checked. Map results cover one address point, and county zoning excludes incorporated municipalities.</p>
       </Section>
       <Section id="next" title="Useful next steps">
         <ul className="list-disc space-y-2 pl-5 text-lg text-navy">{questions[intent].map((question) => <li key={question}>{question}</li>)}</ul>
