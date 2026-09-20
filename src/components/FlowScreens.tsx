@@ -5,6 +5,7 @@ import { DEMO_QUERY_HINT } from "@/data/demo-property";
 import { INTENT_OPTIONS } from "@/lib/routing";
 import type { UserIntent } from "@/lib/types";
 import { DemoBanner } from "@/components/ui";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 
 export function SearchLanding({
   query,
@@ -33,8 +34,8 @@ export function SearchLanding({
       </p>
 
       <DemoBanner>
-        This review demo uses one sample Boca Raton property. Typing an address does not look up
-        that address. No live government, MLS, or paid data is connected.
+        Address suggestions use live county address data. Reports still show one sample Boca Raton
+        property. Selecting an address does not retrieve its ownership, permits, value, or other property records.
       </DemoBanner>
 
       <form
@@ -44,19 +45,12 @@ export function SearchLanding({
           onSearch();
         }}
       >
-        <label htmlFor="address" className="text-[0.82rem] font-semibold uppercase tracking-[0.07em] text-navy">
+        <label htmlFor="property-address" className="text-[0.82rem] font-semibold uppercase tracking-[0.07em] text-navy">
           Property address
         </label>
-        <input
-          id="address"
-          name="address"
-          autoComplete="street-address"
-          placeholder={DEMO_QUERY_HINT}
-          className="mt-2 w-full rounded-sm border border-navy/20 bg-paper px-4 py-3 text-lg text-navy outline-none focus:ring-2 focus:ring-champagne/50"
-          value={query}
-          onChange={(e) => onQuery(e.target.value)}
-        />
-        {error ? <p className="mt-2 text-[0.95rem] text-terracotta">{error}</p> : null}
+        <div className="mt-2">
+          <AddressAutocomplete value={query} onChange={onQuery} error={error} />
+        </div>
         <button type="submit" className="mt-3 w-full rounded-sm bg-navy py-3.5 text-lg font-semibold text-cream">
           Open sample report
         </button>
@@ -90,7 +84,7 @@ export function IntentSelect({
         How should we frame this sample?
       </h1>
       <p className="mt-2 text-[1.02rem] text-muted">
-        You typed “{typedAddress}”. This preview does not research that address. The next screen
+        You entered “{typedAddress}”. This preview does not research that property. The next screen
         opens the sample Boca Raton file.
       </p>
       <div className="mt-5 space-y-3">

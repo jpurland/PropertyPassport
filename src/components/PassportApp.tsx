@@ -38,7 +38,7 @@ export function PassportApp() {
 
   function search() {
     if (!query.trim()) {
-      setError("Enter an address to continue. This preview still opens the sample Boca Raton file — it does not look up what you type.");
+      setError("Enter an address to continue. This preview still opens the sample Boca Raton report.");
       return;
     }
     setError(null);
@@ -56,7 +56,15 @@ export function PassportApp() {
   return (
     <>
       {step === "search" ? (
-        <SearchLanding query={query} error={error} onQuery={setQuery} onSearch={search} />
+        <SearchLanding
+          query={query}
+          error={error}
+          onQuery={(value) => {
+            setQuery(value);
+            setError(null);
+          }}
+          onSearch={search}
+        />
       ) : null}
       {step === "intent" ? (
         <IntentSelect
