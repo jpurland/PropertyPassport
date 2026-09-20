@@ -89,3 +89,68 @@ export function zillowSearchUrl(address: string): string {
   // An address search, not a verified Zillow property ID or a data integration.
   return `https://www.zillow.com/homes/${encodeURIComponent(address.trim().replace(/\s+/g, "-"))}_rb/`;
 }
+
+export const SCHOOL_DISTRICT = "School District of Palm Beach County";
+export const SCHOOL_FINDER = "https://arcgis.palmbeachschools.org/arcgisportal/apps/experiencebuilder/experience/?id=0468f231866f42ae8cb11da91b97b92e";
+export const SCHOOL_BOUNDARIES = "https://arcgis.palmbeachschools.org/arcgisserver/rest/services/Hosted/PBC_SAC/FeatureServer/88";
+export const SCHOOL_DIRECTORY = "https://arcgis.palmbeachschools.org/arcgisserver/rest/services/Hosted/PBC_Schools/FeatureServer/0";
+export type ZonedSchool = { level: "Elementary school" | "Middle school" | "High school"; name: string | null; id: string | null; website: string | null; address: string | null };
+export type SchoolResult = { schools: ZonedSchool[]; schoolYear: string | null; note: string | null; sourceUrl: string; retrievedAt: string; sourceUpdated: string | null; directoryUrl: string | null; directoryUnavailable: boolean };
+
+export function parseSchoolResult(body: unknown, metadata: unknown, sourceUrl: string): SchoolResult {
+  const rows = features(body);
+  if (!rows.length) throw new Error("No attendance zone was returned for this address point. Confirm the address with the district’s Find My School tool.");
+  if (rows.length !== 1) throw new Error("More than one attendance area touches this address point. Confirm the assigned schools with the district.");
+  if (!metadata || typeof metadata !== "object" || "error" in metadata || !("name" in metadata)) throw new Error("The district’s boundary information could not be verified. Please retry.");
+  const name = text(metadata.name);
+  const year = name?.match(/SACSY(\d{4})_(\d{4})/);
+  const a = rows[0].attributes;
+  const specs = [["Elementary school", "elem", "msid_elem"], ["Middle school", "middle", "msid_midd"], ["High school", "high", "msid_high"]] as const;
+  const schools = specs.map(([level, field, idField]): ZonedSchool => {
+    const id = text(a[idField]);
+    return { level, name: text(a[field]), id: id && /^\d{4}$/.test(id) ? id : null, website: null, address: null };
+  });
+  if (schools.every((school) => !school.name)) throw new Error("The attendance area did not include school names. Please check the district’s school finder.");
+  const edits = "editingInfo" in metadata ? metadata.editingInfo : null;
+  const updated = edits && typeof edits === "object" && "lastEditDate" in edits ? edits.lastEditDate : null;
+  return {
+    schools, schoolYear: year && Number(year[2]) === Number(year[1]) + 1 ? `${year[1]}–${year[2]}` : null,
+    note: text(a.info), sourceUrl, retrievedAt: new Date().toISOString(),
+    sourceUpdated: typeof updated === "number" && updated > 0 && updated <= Date.now() ? new Date(updated).toISOString().slice(0, 10) : null,
+    directoryUrl: null, directoryUnavailable: false,
+  };
+}
+
+export function addSchoolDirectory(result: SchoolResult, body: unknown, sourceUrl: string): SchoolResult {
+  const rows = features(body);
+  return { ...result, directoryUrl: sourceUrl, schools: result.schools.map((school) => {
+    // Join by the district's exact school ID. Never substitute a nearby campus.
+    const matches = rows.filter((r) => school.id && text(r.attributes.msid) === school.id);
+    if (!school.name || matches.length !== 1) return school;
+    const a = matches[0].attributes;
+    let website: string | null = null;
+    try {
+      const url = new URL(text(a.website) ?? "");
+      if (url.protocol === "https:" && !url.username && !url.password && (url.hostname === "palmbeachschools.org" || url.hostname.endsWith(".palmbeachschools.org"))) website = url.href;
+    } catch { /* A missing or non-district link stays unavailable. */ }
+    return { ...school, website, address: text(a.address) };
+  }) };
+}
+
+export async function fetchSchools(point: PropertyPoint, signal: AbortSignal): Promise<SchoolResult> {
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y) || point.x < -81 || point.x > -79.9 || point.y < 26.2 || point.y > 27.1) throw new Error("A valid county address point is required for school lookup.");
+  const params = new URLSearchParams({ f: "json", geometry: `${point.x},${point.y}`, geometryType: "esriGeometryPoint", inSR: "4326", spatialRel: "esriSpatialRelIntersects", outFields: "sac_number,elem,middle,high,msid_elem,msid_midd,msid_high,info", returnGeometry: "false", resultRecordCount: "10" });
+  const sourceUrl = `${SCHOOL_BOUNDARIES}/query?${params}`;
+  const [body, metadata] = await Promise.all([readJson(sourceUrl, signal), readJson(`${SCHOOL_BOUNDARIES}?f=json`, signal)]);
+  const result = parseSchoolResult(body, metadata, sourceUrl);
+  const ids = [...new Set(result.schools.flatMap((s) => s.name && s.id ? [s.id] : []))];
+  if (!ids.length) return result;
+  const directoryParams = new URLSearchParams({ f: "json", where: `msid IN (${ids.map((id) => `'${id}'`).join(",")})`, outFields: "msid,address,website", returnGeometry: "false", resultRecordCount: "20" });
+  const directoryUrl = `${SCHOOL_DIRECTORY}/query?${directoryParams}`;
+  try { return addSchoolDirectory(result, await readJson(directoryUrl, signal), directoryUrl); }
+  catch (error) {
+    if (signal.aborted) throw error;
+    // Campus details are optional; do not discard verified attendance results.
+    return { ...result, directoryUnavailable: true };
+  }
+}

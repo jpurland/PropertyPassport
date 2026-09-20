@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import { PermitResearch, PropertyMaps, ZillowCard, AdditionalSources } from "@/components/PropertyResearch";
 import { permitSource } from "@/lib/property-research";
+import { PropertySchools } from "@/components/PropertySchools";
+import { AskDaniela, DanielaLink } from "@/components/AskDaniela";
 import type { CountyPropertyRecord } from "@/lib/property-record";
 import type { UserIntent } from "@/lib/types";
 
@@ -24,9 +26,9 @@ function Section({ id, title, children }: { id: string; title: string; children:
 export function LivePropertyReport({ record: r, intent, onStartOver }: { record: CountyPropertyRecord; intent: UserIntent; onStartOver: () => void }) {
   const pcn = r.parcelNumber.replace(/^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})(\d{4})$/, "$1-$2-$3-$4-$5-$6-$7");
   return <>
-    <header className="bg-navy text-cream"><div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4"><div><p className="text-xs font-semibold uppercase tracking-widest text-champagne">County records · {intentNames[intent]}</p><p className="font-serif text-2xl">Property Passport</p></div><button type="button" onClick={onStartOver} className="shrink-0 py-2 font-semibold text-champagne">New search</button></div></header>
+    <header className="bg-navy text-cream"><div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4"><div><p className="text-xs font-semibold uppercase tracking-widest text-champagne">County records · {intentNames[intent]}</p><p className="font-serif text-2xl">Property Passport</p></div><div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3"><DanielaLink placement="report_header" className="bg-cream text-navy" /><button type="button" onClick={onStartOver} className="min-h-11 px-2 py-2 font-semibold text-champagne">New search</button></div></div></header>
     <main className="mx-auto max-w-6xl space-y-4 px-4 py-5 sm:px-6">
-      <nav aria-label="Report sections" className="flex flex-wrap gap-x-5 gap-y-2 border-b border-champagne/30 pb-3 text-base font-semibold text-navy">{[["overview", "Overview"], ["permits", "Permits"], ["maps", "Flood & zoning"], ["value", "Values"], ["sale", "Sale"], ["zillow", "Zillow"], ["sources", "More sources"], ["next", "Next steps"]].map(([id, title]) => <a key={id} href={`#${id}`} className="py-1 underline-offset-4 hover:underline">{title}</a>)}</nav>
+      <nav aria-label="Report sections" className="flex flex-wrap gap-x-5 gap-y-2 border-b border-champagne/30 pb-3 text-base font-semibold text-navy">{[["overview", "Overview"], ["permits", "Permits"], ["maps", "Flood & zoning"], ["schools", "Schools"], ["value", "Values"], ["sale", "Sale"], ["zillow", "Zillow"], ["sources", "More sources"], ["next", "Next steps"]].map(([id, title]) => <a key={id} href={`#${id}`} className="py-1 underline-offset-4 hover:underline">{title}</a>)}</nav>
       <div>
         <h1 className="font-serif text-3xl leading-tight text-navy sm:text-4xl">{r.address}</h1>
         <p className="mt-2 text-sm text-muted">Matched by parcel number · Retrieved {new Date(r.retrievedAt).toLocaleString("en-US")}</p>
@@ -48,9 +50,11 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
       </Section>
       <PermitResearch key={`permits-${r.parcelNumber}`} record={r} />
       <PropertyMaps key={`maps-${r.parcelNumber}`} parcel={r.parcelNumber} />
+      <PropertySchools key={`schools-${r.parcelNumber}`} parcel={r.parcelNumber} />
       <Section id="value" title="County values">
         <dl className="grid gap-x-8 sm:grid-cols-3"><Field label="County market value">{money(r.countyMarketValue)}</Field><Field label="Assessed value">{money(r.assessedValue)}</Field><Field label="Taxable value">{money(r.taxableValue)}</Field></dl>
         <p className="mt-3 text-base text-muted">These are county assessment figures, not a current sale-price estimate or appraisal. Taxable value is not the tax bill. The source does not identify the valuation year.</p>
+        <AskDaniela placement="values" prompt="Wondering what this property could sell for?" />
       </Section>
       <Section id="sale" title="Latest sale entry in this source">
         <dl className="grid gap-x-8 sm:grid-cols-2"><Field label="Recorded sale date">{r.saleDate ?? missing}</Field><Field label="Recorded sale price">{money(r.salePrice)}</Field><Field label="Recording book / page">{r.book && r.page ? `${r.book} / ${r.page}` : missing}</Field><Field label="Instrument code (as supplied)">{r.instrument ?? missing}</Field></dl>
@@ -63,9 +67,9 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
       </Section>
       <Section id="next" title="Useful next steps">
         <ul className="list-disc space-y-2 pl-5 text-lg text-navy">{questions[intent].map((question) => <li key={question}>{question}</li>)}</ul>
-        <a href="https://pbcpao.gov/" target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded bg-navy px-4 py-3 font-semibold text-cream">Open Property Appraiser website ↗</a>
+        <AskDaniela placement="next_steps" prompt="Buying, selling, or planning improvements? Let’s talk about your next move." />
       </Section>
-      <footer className="py-2 text-sm text-muted">By Premier Estates · Informational public-record summary. Not an official government record, title search, appraisal, or inspection.</footer>
+      <footer className="py-2 text-sm text-muted"><a href="https://premierestatesfl.com/?utm_source=property_passport&utm_medium=referral&utm_content=report_footer" target="_blank" rel="noopener noreferrer" className="font-semibold text-navy underline">By Premier Estates ↗</a> · Informational public-record summary. Not an official government record, title search, appraisal, or inspection.</footer>
     </main>
   </>;
 }

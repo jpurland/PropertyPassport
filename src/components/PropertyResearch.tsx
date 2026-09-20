@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { fetchPropertyPoint, fetchMapResult, permitSource, zillowSearchUrl, RESEARCH_SOURCES, type MapKind, type MapResult, type PropertyPoint } from "@/lib/property-research";
 import type { CountyPropertyRecord } from "@/lib/property-record";
+import { AskDaniela } from "@/components/AskDaniela";
 
 const card = "scroll-mt-4 rounded-lg border border-champagne/35 bg-paper p-4 sm:p-6";
 const link = "inline-flex min-h-11 items-center rounded bg-navy px-4 py-2 font-semibold text-cream";
@@ -36,6 +37,7 @@ export function PermitResearch({ record: r }: { record: CountyPropertyRecord }) 
     <details className="mt-4 border-t border-champagne/25 pt-3 text-navy"><summary className="cursor-pointer py-1 font-semibold">What should I check in the permit record?</summary>
       <ul className="mt-2 list-disc space-y-2 pl-5 text-base"><li>Match the address and parcel before reviewing any work.</li><li>Look for roof, windows, HVAC, electrical, plumbing, additions, and pool work.</li><li>Compare issued permits with final inspections and closure status. An issued permit alone does not confirm completed work.</li><li>Ask the permitting office about expired, open, older, or missing records. Code enforcement and financial liens require separate searches.</li></ul>
     </details>
+    <AskDaniela placement="permits" prompt="Questions about permits or past improvements?" />
   </section>;
 }
 

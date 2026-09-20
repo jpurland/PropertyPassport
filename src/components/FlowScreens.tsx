@@ -6,6 +6,7 @@ import { INTENT_OPTIONS } from "@/lib/routing";
 import type { UserIntent } from "@/lib/types";
 
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import { AskDaniela } from "@/components/AskDaniela";
 
 export function SearchLanding({
   query,
@@ -38,7 +39,7 @@ export function SearchLanding({
       </p>
 
       <p className="mt-4 rounded border border-champagne/40 bg-paper p-3 text-base text-navy">
-        Find county ownership, values, and sale records, then check flood and evacuation maps, county zoning, and the right permit portal. Explore the selected address on Zillow.
+        Find county ownership, values, and sale records, then check flood and evacuation maps, county zoning, zoned public schools, and the right permit portal. Explore the selected address on Zillow.
       </p>
 
       <form
@@ -58,7 +59,7 @@ export function SearchLanding({
           {busy ? "Finding matching addresses…" : "Open property report"}
         </button>
       </form>
-
+      <AskDaniela placement="search" prompt="Have a property question before you start?" />
     </main>
   );
 }

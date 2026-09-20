@@ -1,5 +1,7 @@
 # Property Passport
 
+Purpose: give visitors useful property research and direct interested buyers, sellers, and homeowners to Premier Estates.
+
 Live county property-record lookup by Premier Estates for Palm Beach County, Florida.
 
 ## Current functionality
@@ -38,6 +40,20 @@ Record requests use an exact 17-digit parcel number, require one unique result, 
 - Zillow API access requirements: https://www.zillowgroup.com/developers/api/zestimate/zestimates-api/
 
 Source checks performed September 20, 2026. County/FEMA map requests are credential-free browser GETs with CORS support, 15-second per-request limits, and cancellation on navigation. A source failure is never presented as a successful empty search. Zoning is never requested from the county-only layer for municipal parcels. Successful empty evacuation coverage does not establish that evacuation will never be required. No paid services, keys, proxy, or server runtime were added.
+
+## School attendance lookup
+
+The Schools section displays the School District of Palm Beach County and zoned elementary, middle, and high school names. It uses the district’s public Find My School source: `https://arcgis.palmbeachschools.org/arcgisserver/rest/services/Hosted/PBC_SAC/FeatureServer/88`. At verification on September 20, 2026, the layer is named `SACSY2026_2027`. The report reads the school year and layer update date from live metadata rather than assuming a current year.
+
+The selected parcel’s exact county address point is intersected with one district attendance area. Missing, overlapping, malformed, or truncated results require district confirmation; the application never substitutes the nearest school. Grade-specific `info` notes and missing level assignments are preserved. Optional campus addresses and HTTPS school website links come from `Hosted/PBC_Schools/FeatureServer/0`, joined by exact district school IDs. Failure of this optional directory retains the attendance names. School searches have cancellation and 15-second per-request timeouts.
+
+The official [Find My School](https://arcgis.palmbeachschools.org/arcgisportal/apps/experiencebuilder/experience/?id=0468f231866f42ae8cb11da91b97b92e) is linked for enrollment and school-year confirmation. Choice, transfers, and grade-specific rules may differ. This feature does not collect or store visitor contact information.
+
+## Premier Estates referrals
+
+“Ask Daniela” appears on the search screen, in the report header, after permit and school information, beside county values, and under next steps. All six placements link to `https://premierestatesfl.com/#contact` with fixed UTM referral labels. The existing Premier Estates contact section provides Daniela Amoroso’s call and text actions; this was verified against `jpurland/premierestatesfl` main source. No other site's code was changed.
+
+Links do not append the visitor's property address, PCN, owner information, or other personal data. Referral parameters label the source and placement for destination analytics if configured; they do not identify visitors or create a contact database. Property Passport currently has no lead-storage form, report-email delivery, or marketing subscription. Adding optional contact capture is a separate feature.
 
 ## Development and checks
 
