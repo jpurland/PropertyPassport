@@ -7,6 +7,7 @@ type AddressAutocompleteProps = {
   value: string;
   onChange: (value: string) => void;
   error?: string | null;
+  onSelect?: (suggestion: AddressSuggestion) => void;
 };
 
 type SearchStatus = "idle" | "loading" | "ready" | "empty" | "unavailable" | "selected";
@@ -16,7 +17,7 @@ const listId = `${inputId}-suggestions`;
 const helperId = `${inputId}-help`;
 const errorId = `${inputId}-error`;
 
-export function AddressAutocomplete({ value, onChange, error }: AddressAutocompleteProps) {
+export function AddressAutocomplete({ value, onChange, error, onSelect }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [resultsFor, setResultsFor] = useState("");
   const [status, setStatus] = useState<SearchStatus>("idle");
@@ -102,6 +103,7 @@ export function AddressAutocomplete({ value, onChange, error }: AddressAutocompl
     setResultsFor("");
     setStatus("selected");
     onChange(suggestion.address);
+    onSelect?.(suggestion);
     input.current?.focus({ preventScroll: true });
   }
 
@@ -141,8 +143,8 @@ export function AddressAutocomplete({ value, onChange, error }: AddressAutocompl
   if (status === "ready" && expanded) {
     message = `${currentSuggestions.length} address ${currentSuggestions.length === 1 ? "suggestion" : "suggestions"}. Use the arrow keys and Enter to select, or keep typing.`;
   }
-  if (status === "empty") message = "No matching addresses found. Try adding the street name, or continue with your address as typed.";
-  if (status === "unavailable") message = "Address suggestions are temporarily unavailable. You can still type your address and continue.";
+  if (status === "empty") message = "No matching addresses found. Check the street name, direction, and unit, or try searching the full address.";
+  if (status === "unavailable") message = "Address suggestions are temporarily unavailable. You can type the full address and retry with Open property report.";
   if (status === "selected") message = "Address selected. You can edit it or continue.";
 
   return (

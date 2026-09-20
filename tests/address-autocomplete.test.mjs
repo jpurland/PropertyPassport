@@ -4,7 +4,7 @@ import { suggestAddresses } from "../src/lib/address-autocomplete.ts";
 
 const signal = () => new AbortController().signal;
 const feature = (id, street, city = "BOCA RATON") => ({
-  attributes: { OBJECTID: id, SITE_ADDR_STR: street, MUNICIPALITY: city },
+  attributes: { OBJECTID: id, PARCEL_NUMBER: "00424636010050080", SITE_ADDR_STR: street, MUNICIPALITY: city },
 });
 const response = (features) => new Response(JSON.stringify({ features }));
 
@@ -28,8 +28,9 @@ test("requests only situs address fields, preserves directions/units, deduplicat
   });
   const matches = await suggestAddresses("2727 s ocean", signal());
   assert.equal(matches.length, 5);
+  assert.equal(matches[0].parcelNumber, "00424636010050080");
   assert.equal(matches[0].address, "2727 S OCEAN BLVD 1507, HIGHLAND BEACH, FL");
-  assert.equal(requestUrl.searchParams.get("outFields"), "OBJECTID,SITE_ADDR_STR,MUNICIPALITY");
+  assert.equal(requestUrl.searchParams.get("outFields"), "OBJECTID,PARCEL_NUMBER,SITE_ADDR_STR,MUNICIPALITY");
   assert.equal(requestUrl.searchParams.get("returnGeometry"), "false");
   assert.match(requestUrl.searchParams.get("where"), /STREET_NUMBER = 2727 AND .*SITE_ADDR_STR LIKE '2727 S OCEAN%'/);
   assert.equal(options.credentials, "omit");

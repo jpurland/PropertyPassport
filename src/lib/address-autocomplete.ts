@@ -1,4 +1,4 @@
-export type AddressSuggestion = { id: string; address: string };
+export type AddressSuggestion = { id: string; address: string; parcelNumber?: string };
 
 // Public county address table. Request situs addresses only: CITYNAME/ZIP1 in
 // this table are owner mailing fields and must not be used as property location.
@@ -55,7 +55,7 @@ export async function suggestAddresses(query: string, signal: AbortSignal): Prom
   const params = new URLSearchParams({
     f: "json",
     where: `STREET_NUMBER = ${parsed.houseNumber} AND (${clauses.join(" OR ")})`,
-    outFields: "OBJECTID,SITE_ADDR_STR,MUNICIPALITY",
+    outFields: "OBJECTID,PARCEL_NUMBER,SITE_ADDR_STR,MUNICIPALITY",
     returnGeometry: "false",
     resultRecordCount: "10",
   });
@@ -89,7 +89,7 @@ export async function suggestAddresses(query: string, signal: AbortSignal): Prom
       const city = /^(?:UNINCORPORATED|UNINCORPORATED PALM BEACH COUNTY)$/i.test(municipality.trim())
         ? "Palm Beach County" : municipality.trim();
       const address = `${street.trim().replace(/\s+/g, " ")}, ${city}, FL`;
-      if (!unique.has(address)) unique.set(address, { id: String(id), address });
+      if (!unique.has(address)) unique.set(address, { id: String(id), address, ...(typeof attributes.PARCEL_NUMBER === "string" && /^\d{17}$/.test(attributes.PARCEL_NUMBER) ? { parcelNumber: attributes.PARCEL_NUMBER } : {}) });
       if (unique.size === 5) break;
     }
     const suggestions = [...unique.values()];

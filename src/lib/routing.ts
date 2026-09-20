@@ -11,7 +11,7 @@ export const INTENT_OPTIONS: { id: UserIntent; label: string; description: strin
   {
     id: "buying",
     label: "Considering buying",
-    description: "See the sample record, costs, and questions behind a listing.",
+    description: "Review the county record and prepare questions before buying.",
   },
   {
     id: "selling",
@@ -21,12 +21,12 @@ export const INTENT_OPTIONS: { id: UserIntent; label: string; description: strin
   {
     id: "owner",
     label: "Current owner",
-    description: "Use the passport as a standing file for maintenance and oversight.",
+    description: "Review the county record and prepare maintenance and ownership questions.",
   },
   {
     id: "renovation",
     label: "Considering renovation",
-    description: "See permits, setbacks, and what still needs municipal verification.",
+    description: "Review the property record and identify research still needed for your plans.",
   },
 ];
 
