@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parsePropertyPoint, parseMapResult, fetchPropertyPoint, fetchMapResult, permitSource, zillowSearchUrl } from '../src/lib/property-research.ts';
+import { parsePropertyPoint, parseMapResult, fetchPropertyPoint, fetchMapResult, permitSource, zillowSearchUrl, realtorSearchUrl } from '../src/lib/property-research.ts';
 
 const parcel = '00424636010050080';
 const pointData = () => ({ features: [{ attributes: { PCN: parcel }, geometry: { x: -80.118487, y: 26.413049 } }] });
@@ -47,6 +47,13 @@ test('Zillow link encodes the selected address and unit without creating a fake 
   assert.equal(u.origin, 'https://www.zillow.com'); assert.equal(u.hash, ''); assert.equal(u.search, '');
   assert.equal(decodeURIComponent(u.pathname), '/homes/100-MAIN-ST-#2,-BOCA-RATON,-FL_rb/');
   assert.equal(u.pathname.includes('zpid'), false);
+});
+test('Realtor.com link encodes the selected address and unit without creating a fake listing ID', () => {
+  const address = '  100 MAIN ST #2, BOCA RATON, FL  ';
+  const u = new URL(realtorSearchUrl(address));
+  assert.equal(u.origin, 'https://www.realtor.com'); assert.equal(u.hash, ''); assert.equal(u.search, '');
+  assert.equal(decodeURIComponent(u.pathname), '/realestateandhomes-search/100-MAIN-ST-#2,-BOCA-RATON,-FL');
+  assert.equal(u.pathname.includes('mls'), false);
 });
 test('queries the exact selected PCN and uses its point for map intersections', async (t) => {
   const seen = [];

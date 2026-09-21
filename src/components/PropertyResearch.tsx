@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { fetchPropertyPoint, fetchMapResult, permitSource, zillowSearchUrl, RESEARCH_SOURCES, type MapKind, type MapResult, type PropertyPoint } from "@/lib/property-research";
+import { fetchPropertyPoint, fetchMapResult, permitSource, zillowSearchUrl, realtorSearchUrl, RESEARCH_SOURCES, type MapKind, type MapResult, type PropertyPoint } from "@/lib/property-research";
 import type { CountyPropertyRecord } from "@/lib/property-record";
 import { AskDaniela } from "@/components/AskDaniela";
 
@@ -117,6 +117,17 @@ export function ZillowCard({ address }: { address: string }) {
     <p className="mb-4 mt-2 text-base text-muted">Look for photos, listing history, and any estimate Zillow provides. Confirm the address and unit on Zillow before using the result.</p>
     <External button href={zillowSearchUrl(address)}>Search this address on Zillow</External>
     <p className="mt-3 text-sm text-muted">Opens Zillow in a new tab. Zillow data and Zestimates are not imported into this report. This is an address search link, not an official Zillow widget.</p>
+  </section>;
+}
+
+export function RealtorCard({ address }: { address: string }) {
+  return <section id="realtor" className={card}>
+    <p className="text-xs font-semibold uppercase tracking-widest text-champagne-dark">External property search</p>
+    <h2 className="mt-1 font-serif text-3xl text-navy">Explore this address on Realtor.com</h2>
+    <p className="mt-2 break-words text-lg text-navy">{address}</p>
+    <p className="mb-4 mt-2 text-base text-muted">Look for listing history, photos, and comparable sales Realtor.com provides. Confirm the address and unit on Realtor.com before using the result.</p>
+    <External button href={realtorSearchUrl(address)}>Search this address on Realtor.com</External>
+    <p className="mt-3 text-sm text-muted">Opens Realtor.com in a new tab. Realtor.com data is not imported into this report. This is an address search link, not an official Realtor.com widget.</p>
   </section>;
 }
 
