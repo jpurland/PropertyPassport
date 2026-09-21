@@ -29,14 +29,22 @@ export function SearchLanding({
     <div className="flex min-h-full w-full flex-col px-5 pb-10 pt-5 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
       <aside className="order-first ml-auto w-full max-w-[20rem] lg:order-last lg:mt-1 lg:w-[20rem] lg:max-w-none lg:shrink-0">
         <p className="text-[0.95rem] text-muted">Brought to you by:</p>
-        <Image
-          src="/assets/danielela-amoroso-business-card.png"
-          alt="Daniela Amoroso, Realtor, Premier Real Estate LLC"
-          width={1658}
-          height={949}
-          priority
-          className="mt-1.5 h-auto w-full rounded-sm border border-champagne/40 bg-paper shadow-[0_8px_24px_rgba(21,34,56,0.08)]"
-        />
+        <a
+          href="https://premierestatesfl.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1.5 block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+        >
+          <Image
+            src="/assets/danielela-amoroso-business-card.png"
+            alt="Daniela Amoroso, Realtor, Premier Real Estate LLC"
+            width={1658}
+            height={949}
+            priority
+            className="h-auto w-full rounded-sm border border-champagne/40 bg-paper shadow-[0_8px_24px_rgba(21,34,56,0.08)]"
+          />
+          <span className="sr-only">(opens Premier Estates in a new tab)</span>
+        </a>
       </aside>
       <main className="mx-auto mt-5 flex min-w-0 w-full max-w-xl flex-col lg:mx-0 lg:mt-1 lg:flex-1">
         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-champagne-dark">
