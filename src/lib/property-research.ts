@@ -90,6 +90,11 @@ export function zillowSearchUrl(address: string): string {
   return `https://www.zillow.com/homes/${encodeURIComponent(address.trim().replace(/\s+/g, "-"))}_rb/`;
 }
 
+export function realtorSearchUrl(address: string): string {
+  // An address search, not a verified Realtor.com listing ID or a data integration.
+  return `https://www.realtor.com/realestateandhomes-search/${encodeURIComponent(address.trim().replace(/\s+/g, "-"))}`;
+}
+
 export const SCHOOL_DISTRICT = "School District of Palm Beach County";
 export const SCHOOL_FINDER = "https://arcgis.palmbeachschools.org/arcgisportal/apps/experiencebuilder/experience/?id=0468f231866f42ae8cb11da91b97b92e";
 export const SCHOOL_BOUNDARIES = "https://arcgis.palmbeachschools.org/arcgisserver/rest/services/Hosted/PBC_SAC/FeatureServer/88";

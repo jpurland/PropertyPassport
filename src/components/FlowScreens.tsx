@@ -39,7 +39,7 @@ export function SearchLanding({
       </p>
 
       <p className="mt-4 rounded border border-champagne/40 bg-paper p-3 text-base text-navy">
-        Find county ownership, values, and sale records, then check flood and evacuation maps, county zoning, zoned public schools, and the right permit portal. Explore the selected address on Zillow.
+        Find county ownership, values, and sale records, then check flood and evacuation maps, county zoning, zoned public schools, and the right permit portal. Explore the selected address on Zillow and Realtor.com.
       </p>
 
       <form

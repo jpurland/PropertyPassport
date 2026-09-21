@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { PermitResearch, PropertyMaps, ZillowCard, AdditionalSources } from "@/components/PropertyResearch";
+import { PermitResearch, PropertyMaps, ZillowCard, RealtorCard, AdditionalSources } from "@/components/PropertyResearch";
 import { permitSource } from "@/lib/property-research";
 import { PropertySchools } from "@/components/PropertySchools";
 import { AskDaniela, DanielaLink } from "@/components/AskDaniela";
@@ -28,7 +28,7 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
   return <>
     <header className="bg-navy text-cream"><div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4"><div><p className="text-xs font-semibold uppercase tracking-widest text-champagne">County records · {intentNames[intent]}</p><p className="font-serif text-2xl">Property Passport</p></div><div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3"><DanielaLink placement="report_header" className="bg-cream text-navy" /><button type="button" onClick={onStartOver} className="min-h-11 px-2 py-2 font-semibold text-champagne">New search</button></div></div></header>
     <main className="mx-auto max-w-6xl space-y-4 px-4 py-5 sm:px-6">
-      <nav aria-label="Report sections" className="flex flex-wrap gap-x-5 gap-y-2 border-b border-champagne/30 pb-3 text-base font-semibold text-navy">{[["overview", "Overview"], ["permits", "Permits"], ["maps", "Flood & zoning"], ["schools", "Schools"], ["value", "Values"], ["sale", "Sale"], ["zillow", "Zillow"], ["sources", "More sources"], ["next", "Next steps"]].map(([id, title]) => <a key={id} href={`#${id}`} className="py-1 underline-offset-4 hover:underline">{title}</a>)}</nav>
+      <nav aria-label="Report sections" className="flex flex-wrap gap-x-5 gap-y-2 border-b border-champagne/30 pb-3 text-base font-semibold text-navy">{[["overview", "Overview"], ["permits", "Permits"], ["maps", "Flood & zoning"], ["schools", "Schools"], ["value", "Values"], ["sale", "Sale"], ["zillow", "Zillow"], ["realtor", "Realtor.com"], ["sources", "More sources"], ["next", "Next steps"]].map(([id, title]) => <a key={id} href={`#${id}`} className="py-1 underline-offset-4 hover:underline">{title}</a>)}</nav>
       <div>
         <h1 className="font-serif text-3xl leading-tight text-navy sm:text-4xl">{r.address}</h1>
         <p className="mt-2 text-sm text-muted">Matched by parcel number · Retrieved {new Date(r.retrievedAt).toLocaleString("en-US")}</p>
@@ -61,6 +61,7 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
         <p className="mt-3 text-sm text-muted">This is one county sale entry, not a complete ownership history. A transfer amount does not establish current market value.</p>
       </Section>
       <ZillowCard address={r.address} />
+      <RealtorCard address={r.address} />
       <AdditionalSources record={r} />
       <Section id="research" title="Coverage still to complete">
         <p className="text-base text-muted">Permit and inspection records must be reviewed on the official portal. Code violations, financial liens, full title history, association dues, insurance quotes, and building condition have not been checked. Map results cover one address point, and county zoning excludes incorporated municipalities.</p>
