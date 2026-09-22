@@ -1,6 +1,6 @@
 "use client";
 
-import { PRODUCT_CREDIT, PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_NAME } from "@/lib/brand";
 import type { AddressSuggestion } from "@/lib/address-autocomplete";
 import { INTENT_OPTIONS } from "@/lib/routing";
 import type { UserIntent } from "@/lib/types";
@@ -9,7 +9,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
-import { AskDaniela, DanielaLink } from "@/components/AskDaniela";
+import { DanielaLink } from "@/components/AskDaniela";
 
 export function SearchLanding({
   query,
@@ -31,12 +31,7 @@ export function SearchLanding({
   return (
     <main className="mx-auto w-full max-w-[1600px] px-5 py-6 sm:px-8 lg:px-10 lg:py-8">
       <header className="border-b border-champagne/40 pb-5">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-champagne-dark">
-            {PRODUCT_CREDIT}
-          </p>
-          <p className="text-sm text-muted">Palm Beach County, Florida</p>
-        </div>
+        <p className="text-sm text-muted">Palm Beach County, Florida</p>
         <h1 className="mt-2 font-serif text-[2.6rem] font-semibold leading-tight text-navy sm:text-5xl">
           {PRODUCT_NAME}
         </h1>
@@ -70,7 +65,6 @@ export function SearchLanding({
             </button>
           </form>
           {children}
-          <AskDaniela className="mt-5" placement="search" prompt="Have a question before you start?" />
         </section>
 
         <section aria-labelledby="coverage-heading" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-5 sm:p-6">
