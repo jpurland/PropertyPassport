@@ -30,24 +30,14 @@ export function SearchLanding({
 }) {
   return (
     <main className="mx-auto w-full max-w-[1600px] px-5 py-6 sm:px-8 lg:px-10 lg:py-8">
-      <header className="border-b border-champagne/40 pb-5">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-champagne-dark">
-            {PRODUCT_CREDIT}
-          </p>
-          <p className="text-sm text-muted">Palm Beach County, Florida</p>
-        </div>
-        <h1 className="mt-2 font-serif text-[2.6rem] font-semibold leading-tight text-navy sm:text-5xl">
-          {PRODUCT_NAME}
-        </h1>
-        <p className="mt-1 text-xl text-navy/85 sm:text-2xl">
-          Enter an address. See the property behind the listing.
-        </p>
-      </header>
-
-      <div className="mt-6 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-[1.25fr_1fr_0.9fr] xl:gap-6">
-        <section aria-labelledby="search-heading" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-champagne-dark">Start with a property</p>
+      <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.2fr] lg:gap-8">
+          <header className="min-w-0 lg:col-start-1 lg:row-start-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-champagne-dark">{PRODUCT_CREDIT}</p>
+            <h1 className="mt-2 font-serif text-[2.6rem] font-semibold leading-tight text-navy sm:text-5xl">{PRODUCT_NAME}</h1>
+            <p className="mt-2 text-xl text-navy/85 sm:text-2xl">Enter an address. See the property behind the listing.</p>
+          </header>
+        <section aria-labelledby="search-heading" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-5 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:p-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-champagne-dark">Palm Beach County · Start with a property</p>
           <h2 id="search-heading" className="mt-2 font-serif text-3xl font-semibold text-navy">What would you like to know?</h2>
           <p className="mt-2 text-base leading-relaxed text-muted">
             Find the county record, explore local sources, and bring your questions to Daniela.
@@ -72,11 +62,30 @@ export function SearchLanding({
           {children}
           <AskDaniela className="mt-5" placement="search" prompt="Have a question before you start?" />
         </section>
+          <aside aria-label="Daniela Amoroso at Premier Real Estate" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-4 sm:p-5 lg:col-start-1 lg:row-start-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-champagne-dark">Brought to you by:</p>
+            <div className="mt-3 grid items-center gap-4 sm:grid-cols-[1.5fr_1fr]">
+              <a href="https://premierestatesfl.com" target="_blank" rel="noopener noreferrer" className="block rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy">
+                <Image src="/assets/danielela-amoroso-business-card.png" alt="Daniela Amoroso, Realtor, Premier Real Estate LLC" width={1658} height={949} priority className="h-auto w-full rounded border border-champagne/40" />
+                <span className="sr-only">(opens Premier Real Estate in a new tab)</span>
+              </a>
+              <div>
+                <h2 className="font-serif text-2xl font-semibold leading-tight text-navy">Your property. Your questions.</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted">Talk with Daniela about buying, selling, or your next move.</p>
+                <DanielaLink placement="search" className="mt-3 w-full bg-navy text-cream">Ask Daniela</DanielaLink>
+                <a href="https://premierestatesfl.com/?utm_source=property_passport&utm_medium=referral&utm_campaign=property_questions&utm_content=search_explore" target="_blank" rel="noopener noreferrer" className="mt-1 flex min-h-11 items-center gap-1 text-sm font-semibold text-navy underline underline-offset-4">
+                  Explore Premier Real Estate <span aria-hidden="true">↗</span><span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </div>
+            </div>
+          </aside>
 
-        <section aria-labelledby="coverage-heading" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-5 sm:p-6">
+      </div>
+
+        <section aria-labelledby="coverage-heading" className="mt-6 border-t border-champagne/40 pt-5">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-champagne-dark">Inside your report</p>
           <h2 id="coverage-heading" className="mt-2 font-serif text-3xl font-semibold text-navy">One address. More context.</h2>
-          <ul className="mt-4 divide-y divide-champagne/30">
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
               ["01", "Ownership & values", "County ownership, assessed values, and recorded sales."],
               ["02", "Permits & improvements", "The official permit portal for the property’s jurisdiction."],
@@ -85,7 +94,7 @@ export function SearchLanding({
               ["05", "Zillow & Realtor.com", "Links to explore the selected address on both sites."],
               ["06", "Your next questions", "A place to start a property conversation with Daniela."],
             ].map(([number, title, description]) => (
-              <li key={number} className="flex gap-3 py-3 first:pt-0 last:pb-0">
+              <li key={number} className="flex gap-3 rounded-lg border border-champagne/35 bg-paper p-4">
                 <span aria-hidden="true" className="mt-0.5 text-xs font-semibold text-champagne-dark">{number}</span>
                 <div className="min-w-0">
                   <h3 className="font-sans text-base font-semibold text-navy">{title}</h3>
@@ -96,49 +105,6 @@ export function SearchLanding({
           </ul>
         </section>
 
-        <aside aria-labelledby="daniela-heading" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-5 sm:p-6 md:col-span-2 xl:col-span-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-champagne-dark">Brought to you by:</p>
-          <div className="mt-3 grid gap-5 md:grid-cols-2 xl:grid-cols-1">
-            <div className="self-start">
-              <a
-                href="https://premierestatesfl.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
-              >
-                <Image
-                  src="/assets/danielela-amoroso-business-card.png"
-                  alt="Daniela Amoroso, Realtor, Premier Real Estate LLC"
-                  width={1658}
-                  height={949}
-                  priority
-                  className="h-auto w-full rounded border border-champagne/40"
-                />
-                <span className="sr-only">(opens Premier Real Estate in a new tab)</span>
-              </a>
-              <p className="mt-2">
-                <a
-                  href="https://premierestatesfl.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-semibold text-navy underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
-                >
-                  click here
-                  <span className="sr-only"> for Premier Real Estate (opens in a new tab)</span>
-                </a>
-              </p>
-            </div>
-            <div>
-              <h2 id="daniela-heading" className="font-serif text-3xl font-semibold leading-tight text-navy">Questions about a property?</h2>
-              <p className="mt-3 text-base leading-relaxed text-muted">Buying, selling, or planning your next move? Talk with Daniela Amoroso at Premier Real Estate about what matters to you.</p>
-              <DanielaLink placement="search" className="mt-4 w-full bg-navy text-cream">Ask Daniela a question</DanielaLink>
-              <a href="https://premierestatesfl.com/?utm_source=property_passport&utm_medium=referral&utm_campaign=property_questions&utm_content=search_explore" target="_blank" rel="noopener noreferrer" className="mt-2 flex min-h-11 items-center justify-center gap-2 text-center text-sm font-semibold text-navy underline underline-offset-4">
-                Explore Premier Real Estate <span aria-hidden="true">↗</span><span className="sr-only">(opens in a new tab)</span>
-              </a>
-            </div>
-          </div>
-        </aside>
-      </div>
       <p className="mt-5 border-t border-champagne/40 pt-4 text-sm leading-relaxed text-muted">
         Informational preview — not a listing ad and not an official government record. Availability varies by property and source. Permit and listing links open external sites; verify records and school assignments with the responsible agency.
       </p>
