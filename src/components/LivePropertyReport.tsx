@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { PermitResearch, PropertyMaps, ZillowCard, RealtorCard, AdditionalSources } from "@/components/PropertyResearch";
-import { permitSource } from "@/lib/property-research";
+import { permitSource, EPZB_PORTAL_URL } from "@/lib/property-research";
 import { PropertySchools } from "@/components/PropertySchools";
 import { AskDaniela, DanielaLink } from "@/components/AskDaniela";
 import type { CountyPropertyRecord } from "@/lib/property-record";
@@ -63,8 +63,10 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
       <ZillowCard address={r.address} />
       <RealtorCard address={r.address} />
       <AdditionalSources record={r} />
-      <Section id="research" title="Coverage still to complete">
-        <p className="text-base text-muted">Permit and inspection records must be reviewed on the official portal. Code violations, financial liens, full title history, association dues, insurance quotes, and building condition have not been checked. Map results cover one address point, and county zoning excludes incorporated municipalities.</p>
+      <Section id="research" title="Additional records & verification">
+        <p className="text-base text-navy">Review permits and inspections in <a href={EPZB_PORTAL_URL} target="_blank" rel="noopener noreferrer" className="inline-block py-2 font-semibold underline underline-offset-4">Palm Beach County ePZB ↗<span className="sr-only"> (opens in a new tab)</span></a>. For city-issued permits, also check the city’s building department.</p>
+        <p className="mt-2 text-base text-muted">Permit records are not imported into this report. Code violations, financial liens, full title history, association dues, insurance quotes, and building condition have not been checked.</p>
+        <p className="mt-2 text-sm text-muted">Map coverage: results cover one address point. The county zoning layer covers unincorporated areas; city zoning must be checked separately.</p>
       </Section>
       <Section id="next" title="Useful next steps">
         <ul className="list-disc space-y-2 pl-5 text-lg text-navy">{questions[intent].map((question) => <li key={question}>{question}</li>)}</ul>

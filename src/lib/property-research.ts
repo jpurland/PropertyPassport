@@ -1,5 +1,7 @@
 // Public, read-only ArcGIS queries. Location is resolved by the selected PCN,
 // never by a loosely matched mailing city or a default/demo coordinate.
+export const EPZB_PORTAL_URL = "https://pbc.gov/epzb.admin.webspa/#/";
+
 export const RESEARCH_SOURCES = {
   location: "https://maps.co.palm-beach.fl.us/arcgis/rest/services/OpenData/open_data_v2/FeatureServer/0",
   flood: "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",

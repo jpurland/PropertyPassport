@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { fetchPropertyPoint, fetchMapResult, permitSource, zillowSearchUrl, realtorSearchUrl, RESEARCH_SOURCES, type MapKind, type MapResult, type PropertyPoint } from "@/lib/property-research";
+import { fetchPropertyPoint, fetchMapResult, permitSource, EPZB_PORTAL_URL, zillowSearchUrl, realtorSearchUrl, RESEARCH_SOURCES, type MapKind, type MapResult, type PropertyPoint } from "@/lib/property-research";
 import type { CountyPropertyRecord } from "@/lib/property-record";
 import { AskDaniela } from "@/components/AskDaniela";
 
@@ -32,7 +32,11 @@ export function PermitResearch({ record: r }: { record: CountyPropertyRecord }) 
       ? r.parcelNumber.startsWith("00") ? "Open this parcel in county ePZB to review permit numbers, descriptions, status, contractors, and inspection records. Complete any verification requested by the county."
         : "Open Boca eHub from the city’s page, then search public records using this address or parcel number."
       : "This municipality’s permit search is not connected yet. Confirm the municipality on the Property Appraiser record and use its building department’s records portal."}</p>
-    <External button href={source.url ?? `https://pbcpao.gov/Property/Details?parcelId=${r.parcelNumber}`}>{source.url ? `Open ${source.name}${r.parcelNumber.startsWith("00") ? " for this parcel" : ""}` : "Confirm municipality"}</External>
+    <div className="flex flex-wrap gap-3">
+      <External button href={EPZB_PORTAL_URL}>Open Palm Beach County ePZB</External>
+      <External href={source.url ?? `https://pbcpao.gov/Property/Details?parcelId=${r.parcelNumber}`}>{source.url ? r.parcelNumber.startsWith("00") ? "Open this parcel’s county permits" : `Open ${source.name}` : "Find this property’s municipality"}</External>
+    </div>
+    <p className="mt-3 text-sm text-muted">For city-issued permits, also check the municipality’s building department. The county ePZB portal remains available above.</p>
     <p className="mt-3 text-sm text-muted">Permit records have not been imported into this report. An empty search is not proof of no permits, no violations, or clear title.</p>
     <details className="mt-4 border-t border-champagne/25 pt-3 text-navy"><summary className="cursor-pointer py-1 font-semibold">What should I check in the permit record?</summary>
       <ul className="mt-2 list-disc space-y-2 pl-5 text-base"><li>Match the address and parcel before reviewing any work.</li><li>Look for roof, windows, HVAC, electrical, plumbing, additions, and pool work.</li><li>Compare issued permits with final inspections and closure status. An issued permit alone does not confirm completed work.</li><li>Ask the permitting office about expired, open, older, or missing records. Code enforcement and financial liens require separate searches.</li></ul>
