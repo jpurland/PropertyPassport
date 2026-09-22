@@ -61,14 +61,15 @@ export function PassportApp() {
 
   return <>
     {step === "search" && <>
-      <SearchLanding query={query} error={error} onQuery={edit} onSelectAddress={choose} onSearch={search} busy={busy} />
-      {choices.length > 0 && <section className="mx-auto -mt-5 mb-8 max-w-xl px-5" aria-label="Choose the matching property">
+      <SearchLanding query={query} error={error} onQuery={edit} onSelectAddress={choose} onSearch={search} busy={busy}>
+      {choices.length > 0 && <section className="mt-5 border-t border-champagne/30 pt-4" aria-label="Choose the matching property">
         <h2 className="mb-2 text-lg font-semibold text-navy">Confirm your property</h2>
         <p className="mb-3 text-muted">Select the matching address, including the correct unit.</p>
         <ul className="space-y-2">{choices.map((choice) => <li key={choice.id}>
           <button type="button" className="w-full rounded border border-navy/20 bg-paper p-3 text-left text-navy hover:bg-cream-dark" onClick={() => { choose(choice); setStep("intent"); }}>{choice.address}{choices.some((other) => other.id !== choice.id && other.address === choice.address) && choice.parcelNumber ? <span className="mt-1 block text-sm text-muted">Parcel {choice.parcelNumber}</span> : null}</button>
         </li>)}</ul>
       </section>}
+      </SearchLanding>
     </>}
     {step === "intent" && <IntentSelect typedAddress={query} onBack={startOver} onSelect={load} />}
     {step === "loading" && <main className="mx-auto max-w-xl px-5 py-8">
