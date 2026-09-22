@@ -70,7 +70,7 @@ export function LivePropertyReport({ record: r, intent, onStartOver }: { record:
         <ul className="list-disc space-y-2 pl-5 text-lg text-navy">{questions[intent].map((question) => <li key={question}>{question}</li>)}</ul>
         <AskDaniela placement="next_steps" prompt="Buying, selling, or planning improvements? Let’s talk about your next move." />
       </Section>
-      <footer className="py-2 text-sm text-muted"><a href="https://premierestatesfl.com/?utm_source=property_passport&utm_medium=referral&utm_content=report_footer" target="_blank" rel="noopener noreferrer" className="font-semibold text-navy underline">By Premier Estates ↗</a> · Informational public-record summary. Not an official government record, title search, appraisal, or inspection.</footer>
+      <footer className="py-2 text-sm text-muted"><a href="https://premierestatesfl.com/?utm_source=property_passport&utm_medium=referral&utm_content=report_footer" target="_blank" rel="noopener noreferrer" className="font-semibold text-navy underline">By Premier Real Estate ↗</a> · Informational public-record summary. Not an official government record, title search, appraisal, or inspection.</footer>
     </main>
   </>;
 }

@@ -21,7 +21,7 @@ export type ConfidenceLevel =
 export type UserIntent = "buying" | "selling" | "owner" | "renovation";
 
 export type ServiceCompany =
-  | "Premier Estates"
+  | "Premier Real Estate"
   | "Storm Shield Construction"
   | "Storm Shield Roofing & Windows"
   | "Storm Shield Home Management"
