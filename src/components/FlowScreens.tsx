@@ -26,23 +26,23 @@ export function SearchLanding({
   busy?: boolean;
 }) {
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-5xl flex-col px-5 pb-12 pt-6 sm:px-8">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-14">
-        <header className="order-last min-w-0 w-full max-w-xl lg:order-first lg:flex-1">
+    <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col px-5 py-8 sm:px-8 sm:py-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+        <header className="order-last min-w-0 flex-1 sm:order-first">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-champagne-dark">
             {PRODUCT_CREDIT}
           </p>
-          <h1 className="mt-1.5 font-serif text-[2.5rem] font-semibold leading-[1.05] text-navy">
+          <h1 className="mt-1 font-serif text-[2.35rem] font-semibold leading-[1.05] text-navy sm:text-[2.5rem]">
             {PRODUCT_NAME}
           </h1>
-          <p className="mt-2 text-xl leading-snug text-navy/85">
+          <p className="mt-1.5 text-xl leading-snug text-navy/85">
             Enter an address. See the property behind the listing.
           </p>
-          <p className="mt-1.5 text-[1.02rem] leading-relaxed text-muted">
+          <p className="mt-1 text-[1.02rem] leading-relaxed text-muted">
             Informational preview — not a listing ad and not an official government record.
           </p>
         </header>
-        <aside className="w-full max-w-[18.5rem] shrink-0 self-end lg:self-start">
+        <aside className="mx-auto w-full max-w-[16.5rem] shrink-0 sm:mx-0">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-champagne-dark">
             Brought to you by:
           </p>
@@ -65,7 +65,7 @@ export function SearchLanding({
         </aside>
       </div>
 
-      <section className="mt-6 w-full max-w-xl rounded-md border border-champagne/35 bg-paper p-4 sm:p-5">
+      <section className="mt-5 w-full rounded-md border border-champagne/35 bg-paper p-4 sm:p-5">
         <p className="text-[0.98rem] leading-relaxed text-navy">
           Find county ownership, values, and sale records, then check flood and evacuation maps, county zoning, zoned public schools, and the right permit portal. Explore the selected address on Zillow and Realtor.com.
         </p>
@@ -82,13 +82,13 @@ export function SearchLanding({
           <div className="mt-1.5">
             <AddressAutocomplete value={query} onChange={onQuery} onSelect={onSelectAddress} error={error} />
           </div>
-          <button type="submit" disabled={busy} className="disabled:opacity-60 mt-4 w-full rounded-sm bg-navy py-3.5 text-lg font-semibold text-cream">
+          <button type="submit" disabled={busy} className="disabled:opacity-60 mt-3.5 w-full rounded-sm bg-navy py-3.5 text-lg font-semibold text-cream">
             {busy ? "Finding matching addresses…" : "Open property report"}
           </button>
         </form>
       </section>
 
-      <AskDaniela className="mt-8" placement="search" prompt="Have a property question before you start?" />
+      <AskDaniela className="mt-5" placement="search" prompt="Have a property question before you start?" />
     </main>
   );
 }
