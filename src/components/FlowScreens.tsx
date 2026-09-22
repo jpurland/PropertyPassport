@@ -1,6 +1,6 @@
 "use client";
 
-import { PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_CREDIT, PRODUCT_NAME } from "@/lib/brand";
 import type { AddressSuggestion } from "@/lib/address-autocomplete";
 import { INTENT_OPTIONS } from "@/lib/routing";
 import type { UserIntent } from "@/lib/types";
@@ -9,7 +9,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
-import { DanielaLink } from "@/components/AskDaniela";
+import { AskDaniela, DanielaLink } from "@/components/AskDaniela";
 
 export function SearchLanding({
   query,
@@ -31,7 +31,12 @@ export function SearchLanding({
   return (
     <main className="mx-auto w-full max-w-[1600px] px-5 py-6 sm:px-8 lg:px-10 lg:py-8">
       <header className="border-b border-champagne/40 pb-5">
-        <p className="text-sm text-muted">Palm Beach County, Florida</p>
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-champagne-dark">
+            {PRODUCT_CREDIT}
+          </p>
+          <p className="text-sm text-muted">Palm Beach County, Florida</p>
+        </div>
         <h1 className="mt-2 font-serif text-[2.6rem] font-semibold leading-tight text-navy sm:text-5xl">
           {PRODUCT_NAME}
         </h1>
@@ -65,6 +70,7 @@ export function SearchLanding({
             </button>
           </form>
           {children}
+          <AskDaniela className="mt-5" placement="search" prompt="Have a question before you start?" />
         </section>
 
         <section aria-labelledby="coverage-heading" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-5 sm:p-6">
@@ -91,30 +97,43 @@ export function SearchLanding({
         </section>
 
         <aside aria-labelledby="daniela-heading" className="min-w-0 rounded-lg border border-champagne/40 bg-paper p-5 sm:p-6 md:col-span-2 xl:col-span-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-champagne-dark">Brought to you by</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-champagne-dark">Brought to you by:</p>
           <div className="mt-3 grid gap-5 md:grid-cols-2 xl:grid-cols-1">
-            <a
-              href="https://premierestatesfl.com/?utm_source=property_passport&utm_medium=referral&utm_campaign=property_questions&utm_content=search_card"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block self-start rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
-            >
-              <Image
-                src="/assets/danielela-amoroso-business-card.png"
-                alt="Daniela Amoroso, Realtor, Premier Real Estate LLC"
-                width={1658}
-                height={949}
-                priority
-                className="h-auto w-full rounded border border-champagne/40"
-              />
-              <span className="sr-only">(opens Premier Estates in a new tab)</span>
-            </a>
+            <div className="self-start">
+              <a
+                href="https://premierestatesfl.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+              >
+                <Image
+                  src="/assets/danielela-amoroso-business-card.png"
+                  alt="Daniela Amoroso, Realtor, Premier Real Estate LLC"
+                  width={1658}
+                  height={949}
+                  priority
+                  className="h-auto w-full rounded border border-champagne/40"
+                />
+                <span className="sr-only">(opens Premier Real Estate in a new tab)</span>
+              </a>
+              <p className="mt-2">
+                <a
+                  href="https://premierestatesfl.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-navy underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+                >
+                  click here
+                  <span className="sr-only"> for Premier Real Estate (opens in a new tab)</span>
+                </a>
+              </p>
+            </div>
             <div>
               <h2 id="daniela-heading" className="font-serif text-3xl font-semibold leading-tight text-navy">Questions about a property?</h2>
-              <p className="mt-3 text-base leading-relaxed text-muted">Buying, selling, or planning your next move? Talk with Daniela Amoroso at Premier Estates about what matters to you.</p>
+              <p className="mt-3 text-base leading-relaxed text-muted">Buying, selling, or planning your next move? Talk with Daniela Amoroso at Premier Real Estate about what matters to you.</p>
               <DanielaLink placement="search" className="mt-4 w-full bg-navy text-cream">Ask Daniela a question</DanielaLink>
               <a href="https://premierestatesfl.com/?utm_source=property_passport&utm_medium=referral&utm_campaign=property_questions&utm_content=search_explore" target="_blank" rel="noopener noreferrer" className="mt-2 flex min-h-11 items-center justify-center gap-2 text-center text-sm font-semibold text-navy underline underline-offset-4">
-                Explore Premier Estates <span aria-hidden="true">↗</span><span className="sr-only">(opens in a new tab)</span>
+                Explore Premier Real Estate <span aria-hidden="true">↗</span><span className="sr-only">(opens in a new tab)</span>
               </a>
             </div>
           </div>

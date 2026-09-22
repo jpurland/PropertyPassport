@@ -114,16 +114,16 @@ export function nextStepsFor(intent: UserIntent, passport: PropertyPassport): Ne
 
   if (intent === "buying" || intent === "selling") {
     add(
-      "Premier Estates",
+      "Premier Real Estate",
       intent === "buying"
-        ? "You selected buying. Representation and a professional property review belong with Premier Estates."
-        : "You selected selling. Listing strategy and a market-value review belong with Premier Estates.",
+        ? "You selected buying. Representation and a professional property review belong with Premier Real Estate."
+        : "You selected selling. Listing strategy and a market-value review belong with Premier Real Estate.",
       intent === "buying" ? "professional-review" : "market-value-review",
     );
   }
   if (intent === "buying") {
     add(
-      "Premier Estates",
+      "Premier Real Estate",
       "Assessed value, PAO market value, and the sample range are not an appraisal.",
       "market-value-review",
     );
@@ -159,11 +159,11 @@ export function companyForRequest(kind: ServiceRequestKind, intent: UserIntent):
     case "home-management-plan":
       return "Storm Shield Home Command";
     case "municipal-records":
-      return intent === "renovation" ? "Storm Shield Construction" : "Premier Estates";
+      return intent === "renovation" ? "Storm Shield Construction" : "Premier Real Estate";
     default:
       if (intent === "renovation") return "Storm Shield Construction";
       if (intent === "owner") return "Storm Shield Home Management";
-      return "Premier Estates";
+      return "Premier Real Estate";
   }
 }
 
