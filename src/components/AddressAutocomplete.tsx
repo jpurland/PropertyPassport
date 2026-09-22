@@ -217,10 +217,10 @@ export function AddressAutocomplete({ value, onChange, error, onSelect }: Addres
           </ul>
         ) : null}
       </div>
-      <p id={helperId} role="status" aria-live="polite" aria-atomic="true" className="mt-2 text-sm leading-relaxed text-muted">
+      <p id={helperId} role="status" aria-live="polite" aria-atomic="true" className="mt-1.5 text-sm leading-snug text-muted">
         {message}
       </p>
-      <p className="mt-1 text-xs text-muted">
+      <p className="mt-1 text-xs leading-snug text-muted">
         <a href="https://maps.co.palm-beach.fl.us/arcgis/rest/services/OpenData/Tables/MapServer/1" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy">
           Address data: Palm Beach County
         </a>

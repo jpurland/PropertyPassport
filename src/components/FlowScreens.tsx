@@ -26,46 +26,51 @@ export function SearchLanding({
   busy?: boolean;
 }) {
   return (
-    <div className="flex min-h-full w-full flex-col px-5 pb-10 pt-5 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-      <aside className="order-first ml-auto w-full max-w-[20rem] lg:order-last lg:mt-1 lg:w-[20rem] lg:max-w-none lg:shrink-0">
-        <p className="text-[0.95rem] text-muted">Brought to you by:</p>
-        <a
-          href="https://premierestatesfl.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-1.5 block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
-        >
-          <Image
-            src="/assets/danielela-amoroso-business-card.png"
-            alt="Daniela Amoroso, Realtor, Premier Real Estate LLC"
-            width={1658}
-            height={949}
-            priority
-            className="h-auto w-full rounded-sm border border-champagne/40 bg-paper shadow-[0_8px_24px_rgba(21,34,56,0.08)]"
-          />
-          <span className="sr-only">(opens Premier Estates in a new tab)</span>
-        </a>
-      </aside>
-      <main className="mx-auto mt-5 flex min-w-0 w-full max-w-xl flex-col lg:mx-0 lg:mt-1 lg:flex-1">
-        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-champagne-dark">
-          {PRODUCT_CREDIT}
-        </p>
-        <h1 className="mt-2 font-serif text-[2.5rem] font-semibold leading-[1.05] text-navy">
-          {PRODUCT_NAME}
-        </h1>
-        <p className="mt-3 text-xl leading-snug text-navy/85">
-          Enter an address. See the property behind the listing.
-        </p>
-        <p className="mt-2 text-[1.02rem] leading-relaxed text-muted">
-          Informational preview — not a listing ad and not an official government record.
-        </p>
+    <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col px-5 py-8 sm:px-8 sm:py-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+        <header className="order-last min-w-0 flex-1 sm:order-first">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-champagne-dark">
+            {PRODUCT_CREDIT}
+          </p>
+          <h1 className="mt-1 font-serif text-[2.35rem] font-semibold leading-[1.05] text-navy sm:text-[2.5rem]">
+            {PRODUCT_NAME}
+          </h1>
+          <p className="mt-1.5 text-xl leading-snug text-navy/85">
+            Enter an address. See the property behind the listing.
+          </p>
+          <p className="mt-1 text-[1.02rem] leading-relaxed text-muted">
+            Informational preview — not a listing ad and not an official government record.
+          </p>
+        </header>
+        <aside className="mx-auto w-full max-w-[16.5rem] shrink-0 sm:mx-0">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-champagne-dark">
+            Brought to you by:
+          </p>
+          <a
+            href="https://premierestatesfl.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1.5 block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+          >
+            <Image
+              src="/assets/danielela-amoroso-business-card.png"
+              alt="Daniela Amoroso, Realtor, Premier Real Estate LLC"
+              width={1658}
+              height={949}
+              priority
+              className="h-auto w-full rounded-sm border border-champagne/40 bg-paper shadow-[0_8px_24px_rgba(21,34,56,0.08)]"
+            />
+            <span className="sr-only">(opens Premier Estates in a new tab)</span>
+          </a>
+        </aside>
+      </div>
 
-        <p className="mt-4 rounded border border-champagne/40 bg-paper p-3 text-base text-navy">
+      <section className="mt-5 w-full rounded-md border border-champagne/35 bg-paper p-4 sm:p-5">
+        <p className="text-[0.98rem] leading-relaxed text-navy">
           Find county ownership, values, and sale records, then check flood and evacuation maps, county zoning, zoned public schools, and the right permit portal. Explore the selected address on Zillow and Realtor.com.
         </p>
-
         <form
-          className="mt-6"
+          className="mt-4"
           onSubmit={(e) => {
             e.preventDefault();
             onSearch();
@@ -74,16 +79,17 @@ export function SearchLanding({
           <label htmlFor="property-address" className="text-[0.82rem] font-semibold uppercase tracking-[0.07em] text-navy">
             Property address
           </label>
-          <div className="mt-2">
+          <div className="mt-1.5">
             <AddressAutocomplete value={query} onChange={onQuery} onSelect={onSelectAddress} error={error} />
           </div>
-          <button type="submit" disabled={busy} className="disabled:opacity-60 mt-3 w-full rounded-sm bg-navy py-3.5 text-lg font-semibold text-cream">
+          <button type="submit" disabled={busy} className="disabled:opacity-60 mt-3.5 w-full rounded-sm bg-navy py-3.5 text-lg font-semibold text-cream">
             {busy ? "Finding matching addresses…" : "Open property report"}
           </button>
         </form>
-        <AskDaniela placement="search" prompt="Have a property question before you start?" />
-      </main>
-    </div>
+      </section>
+
+      <AskDaniela className="mt-5" placement="search" prompt="Have a property question before you start?" />
+    </main>
   );
 }
 
