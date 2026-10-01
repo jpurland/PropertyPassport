@@ -14,6 +14,32 @@ const string = (value: unknown): string | null => typeof value === "string" && v
 const amount = (value: unknown): number | null => typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
 const normalize = (value: string) => value.toUpperCase().replace(/\s+/g, " ").trim();
 
+// Autocomplete uses the situs point layer (city/ZIP, no PRE_DIR). PROPINFO uses
+// SITE_ADDR_STR + MUNICIPALITY and may disagree on city labels. PCN is authoritative;
+// require the selected house number (and unit when present) to appear in SITE_ADDR_STR.
+export function addressesCompatible(selectedAddress: string, countyStreet: string): boolean {
+  const selectedStreet = normalize(selectedAddress.split(",")[0] ?? "");
+  const county = normalize(countyStreet);
+  if (!selectedStreet || !county) return false;
+  if (selectedStreet === county) return true;
+
+  const selectedHouse = selectedStreet.match(/^(\d{1,7})\b/)?.[1];
+  const countyHouse = county.match(/^(\d{1,7})\b/)?.[1];
+  if (!selectedHouse || !countyHouse || selectedHouse !== countyHouse) return false;
+
+  const unitMatch = selectedStreet.match(/(?:(?:APT|APARTMENT|UNIT|SUITE|#)\s*)([A-Z0-9-]+)\b/);
+  if (unitMatch && !new RegExp(`(?:^|\\s)${unitMatch[1]}(?:\\s|$)`).test(county)) return false;
+
+  // Ignore direction tokens that exist only in PROPINFO SITE_ADDR_STR.
+  const noise = new Set(["N", "S", "E", "W", "NE", "NW", "SE", "SW", "APT", "APARTMENT", "UNIT", "SUITE"]);
+  const selectedTokens = selectedStreet
+    .replace(/#/g, " ")
+    .split(" ")
+    .filter((token) => token && token !== selectedHouse && !noise.has(token) && !/^\d+$/.test(token));
+  if (!selectedTokens.length) return true;
+  return selectedTokens.every((token) => county.includes(token));
+}
+
 export function parsePropertyRecord(body: unknown, parcelNumber: string, selectedAddress: string, sourceUrl: string): CountyPropertyRecord {
   if (!body || typeof body !== "object" || "error" in body || !("features" in body) || !Array.isArray(body.features)) {
     throw new Error("The county service could not return a property record. Please try again.");
@@ -28,7 +54,9 @@ export function parsePropertyRecord(body: unknown, parcelNumber: string, selecte
   if (!street || !locality) throw new Error("The county record has no complete address. Please confirm it with the Property Appraiser.");
   const displayCity = /^(?:UNINCORPORATED|UNINCORPORATED PALM BEACH COUNTY)$/i.test(locality) ? "Palm Beach County" : locality;
   const address = `${street.replace(/\s+/g, " ")}, ${displayCity}, FL`;
-  if (normalize(address) !== normalize(selectedAddress)) throw new Error("The county address changed or does not match your selection. Please search and select it again.");
+  if (!addressesCompatible(selectedAddress, street)) {
+    throw new Error("The county address changed or does not match your selection. Please search and select it again.");
+  }
   const ownerWithheld = string(a.CONFID_FLG)?.toUpperCase() !== "N";
   const saleTime = typeof a.SALE_DATE === "number" && a.SALE_DATE > 0 && a.SALE_DATE <= Date.now() ? a.SALE_DATE : null;
   return {
