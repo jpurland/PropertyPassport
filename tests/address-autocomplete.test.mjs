@@ -1,70 +1,220 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { suggestAddresses } from "../src/lib/address-autocomplete.ts";
+import {
+  clearAddressSuggestionCache,
+  parseAddressQuery,
+  suggestAddresses,
+  suggestUnitsForBuilding,
+} from "../src/lib/address-autocomplete.ts";
 
 const signal = () => new AbortController().signal;
-const feature = (id, street, city = "BOCA RATON") => ({
-  attributes: { OBJECTID: id, PARCEL_NUMBER: "00424636010050080", SITE_ADDR_STR: street, MUNICIPALITY: city },
+const feature = (id, attrs) => ({ attributes: { OBJECTID: id, ...attrs } });
+const response = (features, exceeded = false) =>
+  new Response(JSON.stringify({ features, ...(exceeded ? { exceededTransferLimit: true } : {}) }));
+
+const oceanCondo = (id, apartment, city, zip, pcn) => feature(id, {
+  PCN: pcn,
+  STREET_NO: "2727",
+  STREET_NAME: "Ocean",
+  STREET_SUFFIX: "Blvd",
+  APARTMENT: apartment,
+  CITY: city,
+  ZIP_CODE: zip,
+  ZIP_CITY: city,
 });
-const response = (features) => new Response(JSON.stringify({ features }));
+
+test("parseAddressQuery supports house, street-only, city/ZIP, commas, units, and suffixes", () => {
+  assert.deepEqual(parseAddressQuery("2727 s ocean blvd unit 1507, Highland Beach, FL 33487"), {
+    houseNumber: "2727",
+    namePrefixes: ["OCEAN"],
+    suffixes: ["BLVD"],
+    unit: "1507",
+    city: "HIGHLAND BEACH",
+    zip: "33487",
+  });
+  assert.equal(parseAddressQuery("Fox Hunt")?.houseNumber, null);
+  assert.ok(parseAddressQuery("Fox Hunt")?.namePrefixes.includes("FOX HUNT"));
+  assert.deepEqual(parseAddressQuery("Palm Lane")?.suffixes, ["LN"]);
+  assert.deepEqual(parseAddressQuery("Palm Court")?.suffixes, ["CT"]);
+  assert.equal(parseAddressQuery("47"), null);
+  assert.equal(parseAddressQuery("2727 FOX%"), null);
+});
 
 test("does not send incomplete addresses or SQL wildcard input", async (t) => {
+  clearAddressSuggestionCache();
   const fetch = t.mock.method(globalThis, "fetch", async () => response([]));
-  for (const value of ["", "4790", "Fox Hunt", "4790 FOX%", "4790 X' OR 1=1--"]) {
+  for (const value of ["", "4790", "Fo", "4790 FOX%", "4790 X' OR 1=1--"]) {
     assert.deepEqual(await suggestAddresses(value, signal()), []);
   }
   assert.equal(fetch.mock.callCount(), 0);
 });
 
-test("requests only situs address fields, preserves directions/units, deduplicates and caps at five", async (t) => {
+test("queries the situs layer with structured fields and returns building choices for condos", async (t) => {
+  clearAddressSuggestionCache();
   let requestUrl, options;
   t.mock.method(globalThis, "fetch", async (url, init) => {
-    requestUrl = new URL(url); options = init;
+    requestUrl = new URL(url);
+    options = init;
     return response([
-      feature(1, "2727 S OCEAN BLVD 1507", "HIGHLAND BEACH"),
-      feature(2, "2727 S OCEAN BLVD 1507", "HIGHLAND BEACH"),
-      ...Array.from({ length: 6 }, (_, i) => feature(i + 3, `2727 S OCEAN BLVD ${i + 100}`, "HIGHLAND BEACH")),
+      oceanCondo(1, "1507", "Highland Beach", "33487", "24434628510001507"),
+      oceanCondo(2, "1508", "Highland Beach", "33487", "24434628510001508"),
+      oceanCondo(3, "1010", "Boca Raton", "33431", "06434716080011010"),
+      oceanCondo(4, "1020", "Boca Raton", "33431", "06434716080011020"),
     ]);
   });
+
   const matches = await suggestAddresses("2727 s ocean", signal());
-  assert.equal(matches.length, 5);
-  assert.equal(matches[0].parcelNumber, "00424636010050080");
-  assert.equal(matches[0].address, "2727 S OCEAN BLVD 1507, HIGHLAND BEACH, FL");
-  assert.equal(requestUrl.searchParams.get("outFields"), "OBJECTID,PARCEL_NUMBER,SITE_ADDR_STR,MUNICIPALITY");
+  assert.equal(matches.length, 2);
+  assert.equal(matches.every((item) => item.kind === "building"), true);
+  assert.ok(matches.some((item) => item.address.includes("Highland Beach") && item.address.includes("33487")));
+  assert.ok(matches.some((item) => item.address.includes("Boca Raton") && item.address.includes("33431")));
+  assert.ok(matches.every((item) => (item.unitCount ?? 0) >= 2));
+  assert.match(requestUrl.pathname, /open_data_v2\/FeatureServer\/0\/query$/);
+  assert.equal(requestUrl.searchParams.get("outFields"), "OBJECTID,PCN,STREET_NO,STREET_NAME,STREET_SUFFIX,APARTMENT,CITY,ZIP_CODE,ZIP_CITY,BUILDING_NUM,FLOOR");
   assert.equal(requestUrl.searchParams.get("returnGeometry"), "false");
-  assert.match(requestUrl.searchParams.get("where"), /STREET_NUMBER = 2727 AND .*SITE_ADDR_STR LIKE '2727 S OCEAN%'/);
+  assert.match(requestUrl.searchParams.get("where"), /STREET_NO = '2727'/);
+  assert.match(requestUrl.searchParams.get("where"), /UPPER\(STREET_NAME\) LIKE 'OCEAN%'/);
   assert.equal(options.credentials, "omit");
   assert.equal(options.referrerPolicy, "no-referrer");
 });
 
-test("normalizes suffixes, directions and explicit unit markers while escaping apostrophes", async (t) => {
+test("street-only and city/ZIP filters use situs CITY/ZIP_CODE, never PROPINFO mailing fields", async (t) => {
+  clearAddressSuggestionCache();
+  const queries = [];
+  t.mock.method(globalThis, "fetch", async (url) => {
+    queries.push(new URL(url).searchParams.get("where"));
+    return response([
+      feature(10, {
+        PCN: "00424636010050080",
+        STREET_NO: "4790",
+        STREET_NAME: "Fox Hunt",
+        STREET_SUFFIX: "Trl",
+        APARTMENT: null,
+        CITY: "Unincorporated",
+        ZIP_CODE: "33487",
+        ZIP_CITY: "Boca Raton",
+      }),
+    ]);
+  });
+
+  const streetOnly = await suggestAddresses("Fox Hunt", signal());
+  assert.equal(streetOnly.length, 1);
+  assert.equal(streetOnly[0].kind, "parcel");
+  assert.equal(streetOnly[0].parcelNumber, "00424636010050080");
+  assert.match(streetOnly[0].address, /Unincorporated · Boca Raton/);
+  assert.match(queries[0], /UPPER\(STREET_NAME\) LIKE 'FOX HUNT%'/);
+  assert.doesNotMatch(queries[0], /CITYNAME|ZIP1/);
+
+  clearAddressSuggestionCache();
+  await suggestAddresses("Ocean Blvd, Highland Beach 33487", signal());
+  assert.match(queries[1], /UPPER\(CITY\) LIKE 'HIGHLAND BEACH%'/);
+  assert.match(queries[1], /ZIP_CODE = '33487'/);
+});
+
+test("Lane versus Court suffixes are queried separately", async (t) => {
+  clearAddressSuggestionCache();
+  const queries = [];
+  t.mock.method(globalThis, "fetch", async (url) => {
+    queries.push(new URL(url).searchParams.get("where"));
+    return response([]);
+  });
+  await suggestAddresses("Palm Lane", signal());
+  await suggestAddresses("Palm Court", signal());
+  assert.match(queries[0], /UPPER\(STREET_SUFFIX\) = 'LN'/);
+  assert.match(queries[1], /UPPER\(STREET_SUFFIX\) = 'CT'/);
+});
+
+test("unit lists for a building are searchable and not capped at five", async (t) => {
+  clearAddressSuggestionCache();
+  t.mock.method(globalThis, "fetch", async () => response(
+    Array.from({ length: 12 }, (_, i) => oceanCondo(
+      i + 1,
+      String(1000 + i),
+      "Highland Beach",
+      "33487",
+      `2443462851000${String(1000 + i).padStart(4, "0")}`,
+    )),
+  ));
+
+  const units = await suggestUnitsForBuilding({
+    streetNo: "2727",
+    streetName: "Ocean",
+    streetSuffix: "Blvd",
+    city: "Highland Beach",
+    zip: "33487",
+    zipCity: "Highland Beach",
+  }, "100", signal());
+
+  assert.equal(units.length, 12);
+  assert.ok(units.every((item) => item.kind === "parcel" && item.parcelNumber));
+  const filtered = await suggestUnitsForBuilding({
+    streetNo: "2727",
+    streetName: "Ocean",
+    streetSuffix: "Blvd",
+    city: "Highland Beach",
+    zip: "33487",
+    zipCity: "Highland Beach",
+  }, "1005", signal());
+  assert.equal(filtered.length, 1);
+  assert.equal(filtered[0].unit, "1005");
+});
+
+test("normalizes capitalization, commas, apostrophes, and unit markers", async (t) => {
+  clearAddressSuggestionCache();
   const queries = [];
   t.mock.method(globalThis, "fetch", async (url) => {
     queries.push(new URL(url).searchParams.get("where"));
     return response([]);
   });
   await suggestAddresses("2727 South Ocean Boulevard Unit 1507, Highland Beach, FL", signal());
-  assert.match(queries[0], /2727 S OCEAN BLVD 1507%/);
+  assert.match(queries[0], /STREET_NO = '2727'/);
+  assert.match(queries[0], /UPPER\(STREET_NAME\) LIKE 'OCEAN%'/);
+  assert.match(queries[0], /UPPER\(STREET_SUFFIX\) = 'BLVD'/);
+  assert.match(queries[0], /UPPER\(APARTMENT\) LIKE '1507%'/);
   await suggestAddresses("111 O'Neal Road", signal());
-  assert.match(queries[1], /111 O''NEAL RD%/);
+  assert.match(queries[1], /O''NEAL/);
   await suggestAddresses("4790 Fox Hunt Trai", signal());
-  assert.match(queries[2], /4790 FOX HUNT TRL%/);
-  await suggestAddresses("100 United Way", signal());
-  assert.match(queries[3], /100 UNITED WAY%/);
+  assert.match(queries[2], /UPPER\(STREET_SUFFIX\) = 'TRL'/);
 });
 
-test("malformed rows are excluded and the selected address never uses owner mailing fields", async (t) => {
+test("malformed rows are excluded and mailing-only fields are never required", async (t) => {
+  clearAddressSuggestionCache();
   t.mock.method(globalThis, "fetch", async () => response([
-    null, {}, feature(1, "", "BOCA RATON"), feature(2, "123 MAIN ST", ""),
-    { attributes: { OBJECTID: 3, SITE_ADDR_STR: "123 MAIN ST", MUNICIPALITY: "UNINCORPORATED", CITYNAME: "CHICAGO", ZIP1: "60601" } },
+    null,
+    {},
+    feature(1, { STREET_NO: "", STREET_NAME: "Main", CITY: "Boca Raton", ZIP_CODE: "33432", PCN: "06434728010001360" }),
+    feature(2, { STREET_NO: "123", STREET_NAME: "Main", STREET_SUFFIX: "St", CITY: "", ZIP_CODE: "33432", PCN: "06434728010001361" }),
+    feature(3, {
+      STREET_NO: "123",
+      STREET_NAME: "Main",
+      STREET_SUFFIX: "St",
+      CITY: "Unincorporated",
+      ZIP_CODE: "33487",
+      ZIP_CITY: "Boca Raton",
+      PCN: "00424636010050080",
+      APARTMENT: null,
+    }),
   ]));
-  assert.deepEqual(await suggestAddresses("123 main", signal()), [
-    { id: "3", address: "123 MAIN ST, Palm Beach County, FL" },
-  ]);
+  const matches = await suggestAddresses("123 main", signal());
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0].parcelNumber, "00424636010050080");
+  assert.match(matches[0].address, /Unincorporated · Boca Raton/);
 });
 
 test("caches completed lookups in memory but never caches provider errors", async (t) => {
-  const fetch = t.mock.method(globalThis, "fetch", async () => response([feature(5, "5281 ASCOT BND")]));
+  clearAddressSuggestionCache();
+  const fetch = t.mock.method(globalThis, "fetch", async () => response([
+    feature(5, {
+      PCN: "00424636010050080",
+      STREET_NO: "5281",
+      STREET_NAME: "Ascot",
+      STREET_SUFFIX: "Bnd",
+      CITY: "Boca Raton",
+      ZIP_CODE: "33496",
+      ZIP_CITY: "Boca Raton",
+      APARTMENT: null,
+    }),
+  ]));
   const first = await suggestAddresses("5281 ascot", signal());
   assert.deepEqual(await suggestAddresses("5281 ASCOT", signal()), first);
   assert.equal(fetch.mock.callCount(), 1);
@@ -75,7 +225,8 @@ test("caches completed lookups in memory but never caches provider errors", asyn
   assert.equal(fetch.mock.callCount(), 3);
 });
 
-test("HTTP and malformed JSON failures surface for manual-entry fallback", async (t) => {
+test("HTTP failures surface as service errors", async (t) => {
+  clearAddressSuggestionCache();
   const fetch = t.mock.method(globalThis, "fetch", async () => new Response("error", { status: 503 }));
   await assert.rejects(suggestAddresses("778 oak", signal()), /unavailable/);
   fetch.mock.mockImplementation(async () => new Response("not json"));
@@ -83,6 +234,7 @@ test("HTTP and malformed JSON failures surface for manual-entry fallback", async
 });
 
 test("propagates cancellation and does not request an already aborted lookup", async (t) => {
+  clearAddressSuggestionCache();
   const fetch = t.mock.method(globalThis, "fetch", (_url, { signal: requestSignal }) => new Promise((_, reject) => {
     requestSignal.addEventListener("abort", () => reject(requestSignal.reason), { once: true });
   }));
@@ -95,6 +247,7 @@ test("propagates cancellation and does not request an already aborted lookup", a
 });
 
 test("bounds a stalled county request with a timeout", async (t) => {
+  clearAddressSuggestionCache();
   t.mock.timers.enable({ apis: ["setTimeout"] });
   t.mock.method(globalThis, "fetch", (_url, { signal: requestSignal }) => new Promise((_, reject) => {
     requestSignal.addEventListener("abort", () => reject(requestSignal.reason), { once: true });
@@ -104,13 +257,32 @@ test("bounds a stalled county request with a timeout", async (t) => {
   await assert.rejects(lookup, { name: "AbortError" });
 });
 
-
 test("keeps different parcels sharing one street address as separate choices", async (t) => {
+  clearAddressSuggestionCache();
   t.mock.method(globalThis, "fetch", async () => response([
-    { attributes: { OBJECTID: 901, PARCEL_NUMBER: "00424636010050081", SITE_ADDR_STR: "901 MAIN ST", MUNICIPALITY: "BOCA RATON" } },
-    { attributes: { OBJECTID: 902, PARCEL_NUMBER: "00424636010050082", SITE_ADDR_STR: "901 MAIN ST", MUNICIPALITY: "BOCA RATON" } },
+    feature(901, {
+      PCN: "00424636010050081",
+      STREET_NO: "901",
+      STREET_NAME: "Main",
+      STREET_SUFFIX: "St",
+      CITY: "Boca Raton",
+      ZIP_CODE: "33432",
+      ZIP_CITY: "Boca Raton",
+      APARTMENT: null,
+    }),
+    feature(902, {
+      PCN: "00424636010050082",
+      STREET_NO: "901",
+      STREET_NAME: "Main",
+      STREET_SUFFIX: "St",
+      CITY: "Boca Raton",
+      ZIP_CODE: "33432",
+      ZIP_CITY: "Boca Raton",
+      APARTMENT: null,
+    }),
   ]));
   const matches = await suggestAddresses("901 main", signal());
-  assert.equal(matches.length, 2);
-  assert.notEqual(matches[0].parcelNumber, matches[1].parcelNumber);
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0].kind, "building");
+  assert.equal(matches[0].unitCount, 2);
 });

@@ -53,7 +53,7 @@ export function SearchLanding({
               Property address
             </label>
             <div className="mt-2">
-              <AddressAutocomplete value={query} onChange={onQuery} onSelect={onSelectAddress} error={error} />
+              <AddressAutocomplete id="property-address" value={query} onChange={onQuery} onSelect={onSelectAddress} error={error} />
             </div>
             <button type="submit" disabled={busy} className="mt-4 min-h-12 w-full rounded bg-navy px-3 py-3 text-lg font-semibold text-cream transition-colors hover:bg-navy/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy disabled:opacity-60">
               {busy ? "Finding matching addresses…" : "Open property report"}

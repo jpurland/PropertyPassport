@@ -21,10 +21,26 @@ test('matches the actual parcel and address, preserving zero while missing field
 test('rejects missing, duplicate, incomplete and wrong-property records', () => {
   for (const body of [{ features: [] }, { features: [...data().features, ...data().features] },
     data({ PARCEL_NUMBER: '00424636010050081' }), data({ SITE_ADDR_STR: '4791 FOX HUNT TRL' }),
-    data({ SITE_ADDR_STR: '4790 FOX HUNT TRL 2' }), data({ MUNICIPALITY: null }),
+    data({ SITE_ADDR_STR: '4790 OTHER ROAD' }), data({ MUNICIPALITY: null }),
     { error: { code: 500 } }, { ...data(), exceededTransferLimit: true }]) {
     assert.throws(() => parse(body));
   }
+});
+test('accepts situs-formatted selections that share PCN house number and street tokens with PROPINFO', () => {
+  const situs = '4790 Fox Hunt Trl, Unincorporated · Boca Raton, FL 33487';
+  const r = parsePropertyRecord(data(), parcel, situs, 'https://county.example/source');
+  assert.equal(r.parcelNumber, parcel);
+  assert.equal(r.address, address);
+});
+test('accepts condo unit selections when PROPINFO includes direction tokens absent from situs', () => {
+  const body = data({
+    PARCEL_NUMBER: '24434628510001507',
+    SITE_ADDR_STR: '2727 S OCEAN BLVD 1507',
+    MUNICIPALITY: 'HIGHLAND BEACH',
+  });
+  const r = parsePropertyRecord(body, '24434628510001507', '2727 Ocean Blvd #1507, Highland Beach, FL 33487', 'https://county.example/source');
+  assert.equal(r.parcelNumber, '24434628510001507');
+  assert.equal(r.address, '2727 S OCEAN BLVD 1507, HIGHLAND BEACH, FL');
 });
 test('withholds owner fields when confidentiality flag is protected or unknown', () => {
   for (const flag of ['Y', null, '', 'U']) {
