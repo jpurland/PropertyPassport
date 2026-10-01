@@ -87,6 +87,8 @@ export function PassportApp() {
   function startOver() {
     cancel();
     setStep("search");
+    setQuery("");
+    setSelected(null);
     setRecord(null);
     setError(null);
   }
