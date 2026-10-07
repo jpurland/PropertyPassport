@@ -18,7 +18,7 @@ const sourceSans = Source_Sans_3({
 export const metadata: Metadata = {
   title: PRODUCT_TITLE,
   description: `${PRODUCT_NAME} review demo. Sample data only. Not a government record, title search, or appraisal.`,
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
