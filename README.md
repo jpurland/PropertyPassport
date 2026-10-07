@@ -75,4 +75,4 @@ Existing GitHub repository: https://github.com/jpurland/PropertyPassport
 
 Cloudflare Worker: `propertypassport`. Root directory `/`, production branch `main`, build command `npm run build`, deploy command `npx wrangler deploy`. Next.js static export produces `out/`; existing `wrangler.toml` serves it.
 
-The approved custom domain is palmbeachpropertypassport.com. Preserve its existing connection. Keep robots.txt and X-Robots-Tag exclusions until a separate indexing decision. This increment adds no paid integrations, customer accounts, lead submission, or payments.
+The approved custom domain is palmbeachpropertypassport.com. Preserve its existing connection. Search indexing is enabled (`robots.txt` Allow and metadata `index, follow`). This increment adds no paid integrations, customer accounts, lead submission, or payments.

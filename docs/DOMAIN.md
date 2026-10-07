@@ -11,6 +11,6 @@ After approval:
 2. Custom domains / routes → add `palmbeachpropertypassport.com`
 3. Add `www.palmbeachpropertypassport.com`
 4. Confirm SSL is active
-5. Confirm `X-Robots-Tag: noindex` still applies until a public launch is requested
+5. Confirm search indexing is allowed (`robots.txt` Allow; no `X-Robots-Tag: noindex`)
 
-Do not treat domain attachment as a production launch or as paid-service enablement.
+Do not treat domain attachment as paid-service enablement.

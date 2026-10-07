@@ -62,4 +62,4 @@ npx wrangler deploy
 ```
 
 Do not attach `palmbeachpropertypassport.com` until the DEMO preview is approved.
-Keep `robots.txt` and `X-Robots-Tag: noindex` until a public launch is requested.
+Search indexing is enabled for launch (`robots.txt` Allow; no `X-Robots-Tag: noindex`).
