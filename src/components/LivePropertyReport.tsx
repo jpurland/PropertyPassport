@@ -13,7 +13,7 @@ const money = (value: number | null) => value === null ? missing : new Intl.Numb
 const intentNames: Record<UserIntent, string> = { buying: "Considering buying", selling: "Considering selling", owner: "Current owner", renovation: "Considering renovation" };
 const questions: Record<UserIntent, string[]> = {
   buying: ["Ask for seller disclosures, recent inspections, and any association assessments.", "Confirm permit history, insurance quotes, and estimated taxes after purchase."],
-  selling: ["Gather permits, improvement receipts, warranties, and association documents.", "Ask a real estate professional to review comparable sales and pricing."],
+  selling: ["Gather permits, improvement receipts, warranties, and association documents.", "Ask Daniela"],
   owner: ["Check the county record for errors and confirm exemptions with the Property Appraiser.", "Keep inspections, maintenance records, and insurance documents together."],
   renovation: ["Confirm the permitting jurisdiction, zoning, setbacks, and association restrictions.", "Have a licensed professional assess the structure and proposed scope before estimating work."],
 };
