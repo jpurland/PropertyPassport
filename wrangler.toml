@@ -1,6 +1,7 @@
 # Cloudflare Worker: propertypassport
 # Framework: Next.js static export (output: "export") → ./out
 # Dashboard Worker name must match this `name` or the Git build fails.
+# Workers Builds trigger: keep this file on main so deploys pick up current app.
 
 name = "propertypassport"
 compatibility_date = "2026-09-20"
