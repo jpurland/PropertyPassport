@@ -43,10 +43,57 @@ test("parseAddressQuery supports house, street-only, city/ZIP, commas, units, an
 test("does not send incomplete addresses or SQL wildcard input", async (t) => {
   clearAddressSuggestionCache();
   const fetch = t.mock.method(globalThis, "fetch", async () => response([]));
-  for (const value of ["", "4790", "Fo", "4790 FOX%", "4790 X' OR 1=1--"]) {
+  for (const value of ["", "Fo", "4790 FOX%", "4790 X' OR 1=1--"]) {
     assert.deepEqual(await suggestAddresses(value, signal()), []);
   }
   assert.equal(fetch.mock.callCount(), 0);
+});
+
+test("house-number-only queries parse and suggest matching addresses", async (t) => {
+  assert.deepEqual(parseAddressQuery("4790"), {
+    houseNumber: "4790",
+    namePrefixes: [],
+    suffixes: [],
+    unit: null,
+    city: null,
+    zip: null,
+  });
+  assert.equal(parseAddressQuery("47"), null);
+
+  clearAddressSuggestionCache();
+  const queries = [];
+  t.mock.method(globalThis, "fetch", async (url) => {
+    queries.push(new URL(url).searchParams.get("where"));
+    return response([
+      feature(10, {
+        PCN: "00424636010050080",
+        STREET_NO: "4790",
+        STREET_NAME: "Fox Hunt",
+        STREET_SUFFIX: "Trl",
+        APARTMENT: null,
+        CITY: "Unincorporated",
+        ZIP_CODE: "33487",
+        ZIP_CITY: "Boca Raton",
+      }),
+      feature(11, {
+        PCN: "06434716080011010",
+        STREET_NO: "4790",
+        STREET_NAME: "Ocean",
+        STREET_SUFFIX: "Blvd",
+        APARTMENT: null,
+        CITY: "Boca Raton",
+        ZIP_CODE: "33431",
+        ZIP_CITY: "Boca Raton",
+      }),
+    ]);
+  });
+
+  const matches = await suggestAddresses("4790", signal());
+  assert.equal(matches.length, 2);
+  assert.ok(matches.some((item) => item.address.includes("Fox Hunt")));
+  assert.ok(matches.some((item) => item.address.includes("Ocean")));
+  assert.match(queries[0], /STREET_NO LIKE '4790%'/);
+  assert.doesNotMatch(queries[0], /STREET_NAME/);
 });
 
 test("queries the situs layer with structured fields and returns building choices for condos", async (t) => {
