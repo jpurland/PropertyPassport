@@ -134,7 +134,14 @@ export function parseAddressQuery(query: string): ParsedQuery | null {
     streetTokens = withoutUnit.split(" ").filter(Boolean);
   }
 
-  if (!streetTokens.length || !streetTokens.some((token) => /[A-Z]/.test(token))) return null;
+  if (!streetTokens.length) {
+    // House-number-only search ("4790"): suggest every county address with
+    // that number. Require at least 3 digits so partial typing stays quiet
+    // until the number is meaningful (mirrors the component minimum).
+    if (!houseNumber || houseNumber.length < 3) return null;
+    return { houseNumber, namePrefixes: [], suffixes: [], unit, city, zip };
+  }
+  if (!streetTokens.some((token) => /[A-Z]/.test(token))) return null;
   if (!houseNumber && streetTokens.join(" ").length < 3) return null;
 
   let suffixes: string[] = [];
@@ -224,11 +231,18 @@ function rowFromAttributes(attributes: Record<string, unknown>): SitusRow | null
 }
 
 function whereClause(parsed: ParsedQuery): string {
-  const nameClauses = parsed.namePrefixes.map(
-    (prefix) => `UPPER(STREET_NAME) LIKE '${escapeSql(prefix)}%'`,
-  );
-  const parts = [`(${nameClauses.join(" OR ")})`];
-  if (parsed.houseNumber) parts.push(`STREET_NO = '${escapeSql(parsed.houseNumber)}'`);
+  const parts: string[] = [];
+  if (parsed.namePrefixes.length) {
+    const nameClauses = parsed.namePrefixes.map(
+      (prefix) => `UPPER(STREET_NAME) LIKE '${escapeSql(prefix)}%'`,
+    );
+    parts.push(`(${nameClauses.join(" OR ")})`);
+    if (parsed.houseNumber) parts.push(`STREET_NO = '${escapeSql(parsed.houseNumber)}'`);
+  } else if (parsed.houseNumber) {
+    // House-number-only: prefix match so suggestions narrow as the number
+    // is typed and the exact number is always included.
+    parts.push(`STREET_NO LIKE '${escapeSql(parsed.houseNumber)}%'`);
+  }
   if (parsed.suffixes.length) {
     const suffixClauses = parsed.suffixes.map(
       (suffix) => `UPPER(STREET_SUFFIX) = '${escapeSql(suffix)}'`,
@@ -359,7 +373,8 @@ export async function suggestAddresses(query: string, signal: AbortSignal): Prom
   if (cached && cached.expires > Date.now()) return cached.suggestions;
 
   const where = whereClause(parsed);
-  const rows = parsed.houseNumber
+  const numberOnly = parsed.houseNumber !== null && parsed.namePrefixes.length === 0;
+  const rows = parsed.houseNumber && !numberOnly
     ? await queryAllSitus(where, signal)
     : (await querySitus(where, signal)).rows;
 
@@ -370,7 +385,7 @@ export async function suggestAddresses(query: string, signal: AbortSignal): Prom
     const parcels = suggestions.filter((item) => item.kind === "parcel");
     if (parcels.length === 1) suggestions = parcels;
   }
-  if (!parsed.houseNumber) suggestions = suggestions.slice(0, maxBuildingSuggestions);
+  if (!parsed.houseNumber || numberOnly) suggestions = suggestions.slice(0, maxBuildingSuggestions);
 
   if (cache.size >= 40) cache.delete(cache.keys().next().value!);
   cache.set(key, { expires: Date.now() + cacheTtl, suggestions });
